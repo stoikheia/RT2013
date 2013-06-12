@@ -40,16 +40,21 @@ struct Mat {
     //std::array is movable only if its contained objects are movable.
     std::auto_ptr<std::array<ScalarT, M*N> > p;
     
-    Mat():p(new std::array<ScalarT, M*N>()) {}
-    Mat(const ScalarT val):p(new std::array<ScalarT, M*N>())
+    Mat()
+    :p(new std::array<ScalarT, M*N>()) {}
+    Mat(const ScalarT val)
+    :Mat()
     {std::fill(p.get()->begin(), p.get()->end(), val);}
-    Mat(const std::initializer_list<ScalarT> &list):p(new std::array<ScalarT, M*N>()) {
+    Mat(const std::initializer_list<ScalarT> &list)
+    :Mat() {
         static_assert(M != 0 && N != 0, "Mat is initialized with invalid num of row or num of col.");
         assert(list.size() == M*N);
         std::copy(list.begin(), list.end(), p->begin());
     }
-    Mat(const Mat &input):p(new std::array<ScalarT, M*N>(*(input.p.get()))) {}
-    Mat(Mat &&input):p(std::move(input.p)) {}
+    Mat(const Mat &input)
+    :p(new std::array<ScalarT, M*N>(*(input.p.get()))) {}
+    Mat(Mat &&input)
+    :p(std::move(input.p)) {}
     
     size_t m() const {return M;}
     size_t n() const {return N;}
@@ -67,7 +72,7 @@ struct Mat {
         assert(M == N);
         Mat mat(type_traits<ScalarT>::zero());
         for (size_t i = 0; i < M; ++i) {
-            mat.p[i][i] == type_traits<ScalarT>::one();
+            mat.get(i,i) == type_traits<ScalarT>::one();
         }
         return mat;//NRVO
     }
@@ -91,9 +96,9 @@ struct Vec3 : public Mat<ScalarT, 3, 1> {
     ScalarT& x() {return this->p->at(0);}
     ScalarT& y() {return this->p->at(1);}
     ScalarT& z() {return this->p->at(2);}
-    ScalarT x() const {return this->p[0];}
-    ScalarT y() const {return this->p[1];}
-    ScalarT z() const {return this->p[2];}
+    ScalarT x() const {return this->p->at(0);}
+    ScalarT y() const {return this->p->at(1);}
+    ScalarT z() const {return this->p->at(2);}
     
     Vec3& operator=(const Vec3 &input) {
         this->p = input.p;
@@ -142,12 +147,15 @@ struct AABB {
     AABB(AABB &&input)
     :min_corner(std::move(input.min_corner)),max_corner(std::move(input.max_corner)) {}
     
-    AABB(const Triangle &input, std::iterator<std::random_access_iterator_tag, Vec3<ScalarT>> &it) {
+    template<typename Contena>
+    AABB(const Triangle &input, const Contena &vertexes) {
+        static_assert(std::is_same<typename Contena::iterator::iterator_category, std::random_access_iterator_tag>::value == true,
+                      "AABB triangle initializer doesnt accept if it is not random access iterator.");
         min_corner = input.v[0]; max_corner = input.v[0];
         for(size_t i = 1; i < 3; ++i) {
             for(size_t j = 0; j < 3; ++j) {
-                min_corner.p[j] = std::min(min_corner.p[j], it[input.v[i]]->p->at(j));
-                max_corner.p[j] = std::max(max_corner.p[j], it[input.v[i]]->p->at(j));
+                min_corner.p->at(j) = std::min(min_corner.p->at(j), vertexes[input.v[i]].p->at(j));
+                max_corner.p->at(j) = std::max(max_corner.p->at(j), vertexes[input.v[i]].p->at(j));
             }
         }
     }
