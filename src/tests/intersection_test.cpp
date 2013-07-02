@@ -86,7 +86,7 @@ TEST_F(IntersectionTest, AABBTest1)
     EXPECT_REAL_EQ(ray2.t, ray.t);
 }
 
-TEST_F(IntersectionTest, clippingTest1)//clipping test
+TEST_F(IntersectionTest, clippingTest1)
 {
     real planev[] = {0.0,0.0,-1.0};
     Plane plane(planev, 1.0);
@@ -125,7 +125,7 @@ TEST_F(IntersectionTest, clippingTest2)
     Vec3 point;
     EXPECT_FALSE(ray.get_intersection_point(plane, point));
     Ray ret;
-    EXPECT_FALSE(ray.get_cliped(plane, ret));
+    EXPECT_TRUE(ray.get_cliped(plane, ret));//start and end are on the plane
 }
 TEST_F(IntersectionTest, clippingTest3)
 {
@@ -139,7 +139,22 @@ TEST_F(IntersectionTest, clippingTest3)
     Vec3 point;
     EXPECT_FALSE(ray.get_intersection_point(plane, point));
     Ray ret;
-    EXPECT_FALSE(ray.get_cliped(plane, ret));
+    EXPECT_TRUE(ray.get_cliped(plane, ret));//start and end are on the plane
+}
+
+TEST_F(IntersectionTest, clippingTest3_2)
+{
+    real planev[] = {0.0,0.0,-1.0};
+    Plane plane(planev, -1.0);
+    real normalv[] = {0.0,-1.0,1.0};
+    Vec3 normal(normalv);
+    real rayv[] = {0.0,1.0,0.0};
+    Ray ray(rayv, normal.to_normal(), 3.0);
+    
+    Vec3 point;
+    EXPECT_FALSE(ray.get_intersection_point(plane, point));
+    Ray ret;
+    EXPECT_FALSE(ray.get_cliped(plane, ret));//start and end are behind the plane
 }
 
 TEST_F(IntersectionTest, clippingTest4)//inv face clipping test

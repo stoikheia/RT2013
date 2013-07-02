@@ -40,20 +40,30 @@ struct Ray {
     bool operator==(const Ray &ray) const {
         return 0 == memcmp(this, &ray, sizeof(Ray));
     }
-
-    bool get_intersection_point(const Plane &plane, Vec3 &ret) const {
+    
+    bool get_intersection_length(const Plane &plane, real &ret) const {
         real denominator = plane.n.dot(n);
         real distance = o.dot(plane.n);
         
         if(plane.d == -distance) {
-            ret = o;
-            return true;//on the plane
+            ret = type_traits<real>::zero();
+            return true;//both start and end is on the plane
         }
         if(type_traits<real>::zero() == denominator) {
-            return false;//orthogonal
+            return false;//orthogonal (and not on the plane)
         }
         
-        real tt = (-distance - plane.d) / denominator;
+        //ret = (-distance - plane.d) / denominator;//memo : similar to formura
+        ret = -(distance + plane.d) / denominator;
+        return true;//intersection (positive or negative)
+    }
+
+    bool get_intersection_point(const Plane &plane, Vec3 &ret) const {
+
+        real tt;
+        if(!get_intersection_length(plane, tt)) {
+            return false;//orthogonal
+        }
         if(type_traits<real>::zero() <= tt && tt <= t) {
             ret.x() = o.x() + n.x() * tt; ret.y() = o.y() + n.y() * tt; ret.z() = o.z() + n.z() * tt;
             return true;
@@ -63,17 +73,35 @@ struct Ray {
     }
 
     bool get_cliped(const Plane &plane, Ray &ret) const {
-        Vec3 point;
-        if(get_intersection_point(plane, point)) {
-            if(type_traits<real>::zero() > n.dot(plane.n)) {//plane normal faces origin.
-                ret = Ray::create_start_end(o, point);
-            } else {
-                ret = Ray(point, n, t - (point - o).length());
-            }
-            return true;
-        } else {
-            return false;
+        
+        real tt;
+        if(!get_intersection_length(plane, tt)) {
+            return false;//orthogonal
         }
+        
+        real dir = plane.n.dot(n);
+        if(type_traits<real>::zero() <= dir) {//same direction
+            if(type_traits<real>::zero() <= tt) {
+                if(tt < t) {
+                    ret = Ray(o + n * tt, n, t - tt);//clip : start
+                } else {
+                    return false;//start/end are behind the plane.
+                }
+            } else {
+                ret = self;//both start and end are front of the plane.
+            }
+        } else {//opposite direction
+            if(type_traits<real>::zero() <= tt) {
+                if(tt < t) {
+                    ret = Ray(o, n, tt);//clip : end
+                } else {
+                    ret = self;//start/end are front of the plane.
+                }
+            } else {
+                return false;//start/end are behind the plane.
+            }
+        }
+        return true;
     }
     
     std::pair<Vec3, Vec3> get_points() const {
@@ -96,13 +124,15 @@ struct AABB {
     Vec3 min_corner;
     Vec3 max_corner;
 
-    AABB() {}
+    AABB() = default;
+    AABB(const AABB &) = default;
+    AABB(AABB &&) = default;
+    ~AABB() = default;
+    AABB& operator=(const AABB&) = default;
+    AABB& operator=(AABB&&) = default;
+    
     AABB(const Vec3 &input_min_corner, const Vec3 &input_max_corner)
         :min_corner(input_min_corner),max_corner(input_max_corner) {}
-    AABB(const AABB &input)
-        :min_corner(input.min_corner),max_corner(input.max_corner) {}
-    AABB(AABB &&input)
-        :min_corner(std::move(input.min_corner)),max_corner(std::move(input.max_corner)) {}
 
     template<typename Conteiner>
     AABB(const Triangle &tri, const Conteiner &vertexes) {
