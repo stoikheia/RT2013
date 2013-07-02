@@ -19,23 +19,15 @@ struct Ray {
     Vec3 o,n;//origin, direction(normal)
     real t;//length
 
-    Ray()
-    :o(),n(),t(type_traits<real>::inf()) {}
+    Ray() = default;
+    Ray(const Ray&) = default;
+    Ray(Ray&&) = default;
+    ~Ray() = default;
+    Ray& operator=(const Ray&) = default;
+    Ray& operator=(Ray&&) = default;
+    
     Ray(const Vec3 &o_, const Vec3 &n_, real len = type_traits<real>::inf())
     :o(o_),n(n_),t(len) {}
-    Ray(const Ray &ray_)
-    :Ray(ray_.o, ray_.n, ray_.t) {}
-    Ray(Ray &&ray_)
-    :Ray(std::move(ray_.o), std::move(ray_.n), ray_.t) {}
-
-    Ray& operator=(const Ray &ray) {
-        self.o = ray.o; self.n = ray.o; self.t = ray.t;
-        return *this;
-    }
-    Ray& operator=(Ray &&ray) {
-        self.o = std::move(ray.o); self.n = std::move(ray.n); self.t = ray.t;
-        return *this;
-    }
     
     bool operator==(const Ray &ray) const {
         return 0 == memcmp(this, &ray, sizeof(Ray));
@@ -75,8 +67,13 @@ struct Ray {
     bool get_cliped(const Plane &plane, Ray &ret) const {
         
         real tt;
-        if(!get_intersection_length(plane, tt)) {
-            return false;//orthogonal
+        if(!get_intersection_length(plane, tt)) {//orthogonal
+            if(0 < plane.n.dot(o) + plane.d) {
+                ret = self;//ray is front of the plane
+                return true;
+            } else {
+                return false;
+            }
         }
         
         real dir = plane.n.dot(n);
