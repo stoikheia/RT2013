@@ -4,174 +4,367 @@
  * @author Reiji Tokuda.
  *
  * Interface file of primitive in RT2013 on 2013/06/12.
- * 
+ * NoN NRVO.
+ * all classes in this file are POD.
  */
 
 #ifndef primitive_H
 #define primitive_H
 
-#include <array>
-#include <initializer_list>
+#include <algorithm>
+#include <limits>
+#include <cmath>
 //#include <exception>
 #include <cassert>
+
+typedef double real;
+
+//unko macro
+#define self (*this)
 
 template<typename T>
 struct type_traits {
     static T zero();
     static T one();
+    static T inf();
 };
-template<>
-struct type_traits<float> {
+//template<typename T> struct zero {static const T value;};//this way is mendoi
+template<> struct type_traits<float> {
     static float zero() {return 0.0f;}
     static float one() {return 1.0f;}
+    static float inf() {return std::numeric_limits<float>::max();}
 };
 template<>
 struct type_traits<double> {
     static double zero() {return 0.0;}
     static double one() {return 1.0;}
+    static double inf() {return std::numeric_limits<double>::max();}
 };
 
+template <typename T> struct is_commutative_property_plus;
+template <> struct is_commutative_property_plus<float> : public std::true_type {};
+template <> struct is_commutative_property_plus<double> : public std::true_type {};
 
-template<typename ScalarT, std::size_t M , std::size_t N>
-struct Mat {
+template <typename T> struct is_commutative_property_mul;
+template <> struct is_commutative_property_mul<float> : public std::true_type {};
+template <> struct is_commutative_property_mul<double> : public std::true_type {};
+
+
+/*  // < delived classes cannot aggregated-initialize and these cannot replace initializer-list.
+    // < std::array cannot be used because there is no initializer_list in VC.
+template<size_t M, size_t N>
+struct DMat {//density matrix
+        
+    static_assert(M != 0 && N != 0, "DMat class cannot allow zero row or zero col.");
+    typedef real* iterator;
+    typedef const real* const_iterator;
+        
+    real e[M*N];
     
-    typedef ScalarT scalar_t;
+    DMat() = default;
+    DMat(const DMat &mat) = default;
+    ~DMat() = default;
     
-    //std::array is movable only if its contained objects are movable.
-    std::auto_ptr<std::array<ScalarT, M*N> > p;
+    DMat(real val)
+    {std::fill(begin(), end(), val);}
+    DMat(const real p[])
+    {std::copy(p, p+M*N, begin());}
+        
+    static const size_t m = M;
+    static const size_t n = N;
     
-    Mat()
-    :p(new std::array<ScalarT, M*N>()) {}
-    Mat(const ScalarT val)
-    :Mat()
-    {std::fill(p.get()->begin(), p.get()->end(), val);}
-    Mat(const std::initializer_list<ScalarT> &list)
-    :Mat() {
-        static_assert(M != 0 && N != 0, "Mat is initialized with invalid num of row or num of col.");
-        assert(list.size() == M*N);
-        std::copy(list.begin(), list.end(), p->begin());
+    real& get(size_t i,size_t j) {
+        assert(i < M && j < N);
+        return e[i*N + j];
     }
-    Mat(const Mat &input)
-    :p(new std::array<ScalarT, M*N>(*(input.p.get()))) {}
-    Mat(Mat &&input)
-    :p(std::move(input.p)) {}
-    
-    size_t m() const {return M;}
-    size_t n() const {return N;}
-    
-    ScalarT &get(size_t m, size_t n) {
-        assert(m < M && n < N);
-        return (*p)[m*N+n];
+    real get(size_t i,size_t j) const {
+        assert(i < M && j < N);
+        return e[i*N + j];
     }
-    ScalarT get(size_t m, size_t n) const {
-        assert(m < M && n < N);
-        return p[m*N+n];
+    iterator begin() {return e;}
+    iterator end() {return (&e[0])+M*N;}
+    const_iterator begin() const {return e;}
+    const_iterator end() const {return (&e[0])+M*N;}
+    
+    real& operator[](size_t ij) {assert(ij < M*N); return e[ij];}
+    real operator[](size_t ij) const {assert(ij < M*N); return e[ij];}
+    
+    DMat& operator=(const DMat &mat) = default;
+    DMat& operator=(real val) {
+        std::fill(begin(), end(), val);
+        return self;
+    }
+};
+*/
+
+struct Vec2 {
+    
+    typedef real* iterator;
+    typedef const real* const_iterator;
+    static const size_t N = 2;
+    
+    real e[N];
+    
+    //POD
+    Vec2() = default;
+    Vec2(const Vec2 &) = default;
+    Vec2(Vec2 &&) = default;
+    ~Vec2() = default;
+    Vec2& operator=(const Vec2 &) = default;
+    Vec2& operator=(Vec2 &&) = default;
+    
+    Vec2(real val) {std::fill(begin(), end(), val);}
+    Vec2(real x, real y) {e[0]=x;e[1]=y;}
+    Vec2(const real *p) {std::copy(p, p+N, begin());}
+    
+    bool operator==(const Vec2 &vec) const {
+        return 0==memcmp(this, &vec, sizeof(Vec2));
     }
     
-    static Mat &&Identity() {
-        assert(M == N);
-        Mat mat(type_traits<ScalarT>::zero());
-        for (size_t i = 0; i < M; ++i) {
-            mat.get(i,i) == type_traits<ScalarT>::one();
+    iterator begin() {return e;}
+    iterator end() {return (&e[0])+N;}
+    const_iterator begin() const {return e;}
+    const_iterator end() const {return (&e[0])+N;}
+    
+    real& operator[](size_t i) {assert(i < N); return e[i];}
+    real operator[](size_t i) const {assert(i < N); return e[i];}
+
+    real& x() {return self[0];}
+    real& y() {return self[1];}
+    real x() const {return self[0];}
+    real y() const {return self[1];}
+    
+    real& u() {return self[0];}
+    real& v() {return self[1];}
+    real u() const {return self[0];}
+    real v() const {return self[1];}
+    
+};
+static_assert(std::is_pod<Vec2>::value, "Vec2 is not POD.");
+
+
+struct Vec3 {
+    
+    typedef real* iterator;
+    typedef const real* const_iterator;
+    static const size_t N = 3;
+    
+    real e[N];
+    
+    //POD
+    Vec3() = default;
+    Vec3(const Vec3 &) = default;
+    Vec3(Vec3 &&) = default;
+    ~Vec3() = default;
+    Vec3& operator=(const Vec3 &) = default;
+    Vec3& operator=(Vec3 &&) = default;
+    
+    Vec3(real val) {std::fill(begin(), end(), val);}
+    Vec3(real x, real y, real z) {e[0]=x;e[1]=y;e[2]=z;}
+    Vec3(const real *p) {std::copy(p, p+N, begin());}
+    
+    bool operator==(const Vec3 &vec) const {
+        return 0==memcmp(this, &vec, sizeof(Vec3));
+    }
+    
+    iterator begin() {return e;}
+    iterator end() {return (&e[0])+N;}
+    const_iterator begin() const {return e;}
+    const_iterator end() const {return (&e[0])+N;}
+    
+    real& operator[](size_t i) {assert(i < N); return e[i];}
+    real operator[](size_t i) const {assert(i < N); return e[i];}
+    
+    
+    real& x() {return e[0];}
+    real& y() {return e[1];}
+    real& z() {return e[2];}
+    real x() const {return e[0];}
+    real y() const {return e[1];}
+    real z() const {return e[2];}
+    
+    //Plus Vec3
+    Vec3 &operator+=(const Vec3 &vec) {
+        self.x()+=vec.x(); self.y()+=vec.y(); self.z()+=vec.z();
+        return self;
+    }
+    Vec3 operator+(const Vec3 &vec) const {
+        return Vec3(self.x()+vec.x(), self.y()+vec.y(), self.z()+vec.z());
+    }
+
+    //Plus real
+    Vec3 &operator+=(real val) {
+        self.x()+=val; self.y()+=val; self.z()+=val;
+        return self;
+    }
+    Vec3 operator+(real val) const {
+        return Vec3(self.x()+val, self.y()+val, self.z()+val);
+    }
+    
+    //Sub Vec3
+    Vec3 &operator-=(const Vec3 &vec) {
+        self.x()-=vec.x(); self.y()-=vec.y(); self.z()-=vec.z();
+        return self;
+    }
+    Vec3 operator-(const Vec3 &vec) const {
+        return Vec3(self.x()-vec.x(), self.y()-vec.y(), self.z()-vec.z());
+    }
+    
+    //Sub real
+    Vec3 &operator-=(real val) {
+        self.x()-=val; self.y()-=val; self.z()-=val;
+        return self;
+    }
+    Vec3 operator-(real val) const {
+        return Vec3(self.x()-val, self.y()-val, self.z()-val);
+    }
+    
+    //Mul real
+    Vec3 &operator*=(real &val) {
+        self.x()*=val; self.y()*=val; self.z()*=val;
+        return self;
+    }
+    Vec3 operator*(real val) const {
+        return Vec3(self.x()*val, self.y()*val, self.z()*val);
+    }
+    
+    //Div real
+    Vec3 &operator/=(real &val) {
+        self.x()/=val; self.y()/=val; self.z()/=val;
+        return self;
+    }
+    Vec3 operator/(real val) const {
+        return Vec3(self.x()/val, self.y()/val, self.z()/val);
+    }
+    
+    real dot(const Vec3 &vec) const {
+        return self.x()*vec.x()+self.y()*vec.y()+self.z()*vec.z();
+    }
+    Vec3 cross(const Vec3 &vec) const {
+        return Vec3(self.y()*vec.z()-self.z()*vec.y(),
+                    self.z()*vec.x()-self.x()*vec.z(),
+                    self.x()*vec.y()-self.y()*vec.x());
+    }
+    real norm() const {
+        return self.x()*self.x()+self.y()*self.y()+self.z()*self.z();
+    }
+    real length() const {
+        return std::sqrt(norm());
+    }
+    Vec3& to_normal() {
+        real len = length();
+        if(type_traits<real>::zero() != len) {
+            self /= len;
+        } else {
+            assert(0);
         }
-        return mat;//NRVO
+        return self;
     }
+
 };
+static_assert(std::is_pod<Vec3>::value, "Vec3 is not POD.");
 
-
-template<typename ScalarT>
-struct Vec3 : public Mat<ScalarT, 3, 1> {
+struct Vec4 {
     
-    Vec3(ScalarT val = type_traits<ScalarT>::zero())
-    :Mat<ScalarT,3,1>(val) {}
-    Vec3(ScalarT x, ScalarT y, ScalarT z)
-    :Mat<ScalarT,3,1>({x,y,z}) {}
-    Vec3(const std::initializer_list<ScalarT> &list)
-    :Mat<ScalarT,3,1>(list) {}
-    Vec3(const Vec3 &input)
-    :Mat<ScalarT,3,1>(input) {}
-    Vec3(Vec3 &&input)
-    :Mat<ScalarT,3,1>(std::move(input)) {}
+    typedef real* iterator;
+    typedef const real* const_iterator;
+    static const size_t N = 4;
     
-    ScalarT& x() {return this->p->at(0);}
-    ScalarT& y() {return this->p->at(1);}
-    ScalarT& z() {return this->p->at(2);}
-    ScalarT x() const {return this->p->at(0);}
-    ScalarT y() const {return this->p->at(1);}
-    ScalarT z() const {return this->p->at(2);}
+    real e[N];
     
-    Vec3& operator=(const Vec3 &input) {
-        this->p = input.p;
-        return *this;
-    }
-    Vec3 &operator=(Vec3 &&input) {
-        this->p = std::move(input.p);
-        return *this;
+    //POD
+    Vec4() = default;
+    Vec4(const Vec4 &) = default;
+    Vec4(Vec4 &&) = default;
+    ~Vec4() = default;
+    Vec4& operator=(const Vec4 &) = default;
+    Vec4& operator=(Vec4 &&) = default;
+    
+    Vec4(real val) {std::fill(begin(), end(), val);}
+    Vec4(real x, real y, real z, real w) {e[0]=x;e[1]=y;e[2]=z;e[3]=w;}
+    Vec4(const real *p) {std::copy(p, p+N, begin());}
+    
+    bool operator==(const Vec4 &vec) const {
+        return 0==memcmp(this, &vec, sizeof(Vec4));
     }
     
+    iterator begin() {return e;}
+    iterator end() {return (&e[0])+N;}
+    const_iterator begin() const {return e;}
+    const_iterator end() const {return (&e[0])+N;}
+    
+    real& operator[](size_t i) {assert(i < N); return e[i];}
+    real operator[](size_t i) const {assert(i < N); return e[i];}
+    
+    real& x() {return e[0];}
+    real& y() {return e[1];}
+    real& z() {return e[2];}
+    real& w() {return e[3];}
+    real x() const {return e[0];}
+    real y() const {return e[1];}
+    real z() const {return e[2];}
+    real w() const {return e[3];}
+    
+    real& a() {return e[0];}
+    real& r() {return e[1];}
+    real& g() {return e[2];}
+    real& b() {return e[3];}
+    real a() const {return e[0];}
+    real r() const {return e[1];}
+    real g() const {return e[2];}
+    real b() const {return e[3];}
+    
 };
+static_assert(std::is_pod<Vec4>::value, "Vec4 is not POD.");
 
-struct Shape {
-    Shape() {}
+struct Material {
+    
+    
+    Vec4 diffuse;
+    Vec4 specular;
+    Vec4 ambient;
+    real reflection;
+    real refractive;
+    
+    //POD
+    Material() = default;
+    Material(const Material &) = default;
+    Material(Material &&) = default;
+    ~Material() = default;
+    Material& operator=(const Material &) = default;
+    Material& operator=(Material &&) = default;
+    
+    Material(real val)
+    :diffuse(val),specular(val),ambient(val),
+    reflection(val),refractive(val) {}
 };
+static_assert(std::is_pod<Material>::value, "Material is not POD.");
 
-struct Triangle : Shape {
-    std::array<size_t, 3> v;//indexes
+struct Vertex {
     
-    Triangle(size_t v0, size_t v1, size_t v2)
-    :v({{v0,v1,v2}}) {}
-    Triangle(const std::initializer_list<size_t> &list)
-    :v() {assert(list.size() == 3); std::copy(list.begin(), list.end(), v.begin());}
+    typedef real scalar_t;
+    
+    Vec3 p;//pos
+    Vec2 t;//tex
+    size_t m;//mat id
+    
+    //POD
+    Vertex() = default;
+    Vertex(const Vertex &) = default;
+    Vertex(Vertex &&) = default;
+    ~Vertex() = default;
+    Vertex& operator=(const Vertex &) = default;
+    Vertex& operator=(Vertex &&) = default;
+    
+    Vertex(const Vec3 &p_, const Vec2 &t_, size_t m_)
+    :p(p_),t(t_),m(m_) {}
+    Vertex(const real *p_, const real *t_, size_t m_)
+    :p(p_),t(t_),m(m_) {}
+    Vertex(const real p_, const real t_, size_t m_)
+    :p(p_),t(t_),m(m_) {}
 };
+static_assert(std::is_pod<Vertex>::value, "Vertex is not POD.");
 
-template<typename ScalarT>
-struct Sphere : Shape {
-    Vec3<ScalarT> pos;
-    ScalarT r;
-    Sphere(const Vec3<ScalarT> &input_pos, ScalarT input_r)
-    :pos(input_pos),r(input_r) {}
-};
-
-
-template<typename ScalarT>
-struct AABB {
-    
-    Vec3<ScalarT> min_corner;
-    Vec3<ScalarT> max_corner;
-    
-    AABB() {}
-    AABB(const Vec3<ScalarT> &input_min_corner, const Vec3<ScalarT> &input_max_corner)
-    :min_corner(input_min_corner),max_corner(input_max_corner) {}
-    AABB(const AABB &input)
-    :min_corner(input.min_corner),max_corner(input.max_corner) {}
-    AABB(AABB &&input)
-    :min_corner(std::move(input.min_corner)),max_corner(std::move(input.max_corner)) {}
-    
-    template<typename Contena>
-    AABB(const Triangle &input, const Contena &vertexes) {
-        static_assert(std::is_same<typename Contena::iterator::iterator_category, std::random_access_iterator_tag>::value == true,
-                      "AABB triangle initializer doesnt accept if it is not random access iterator.");
-        min_corner = input.v[0]; max_corner = input.v[0];
-        for(size_t i = 1; i < 3; ++i) {
-            for(size_t j = 0; j < 3; ++j) {
-                min_corner.p->at(j) = std::min(min_corner.p->at(j), vertexes[input.v[i]].p->at(j));
-                max_corner.p->at(j) = std::max(max_corner.p->at(j), vertexes[input.v[i]].p->at(j));
-            }
-        }
-    }
-    
-    AABB(const Sphere<ScalarT> &input)
-    :min_corner(input.pos.x() - input.r, input.pos.y() - input.r, input.pos.z() - input.r),
-    max_corner(input.pos.x() + input.r, input.pos.y() + input.r, input.pos.z() + input.r) {}
-    
-    void unionize(const AABB &input) {
-        for(size_t i = 0; i < 3; ++i) {
-            this->min_corner.p->at(i) = std::min(*(this->min_corner.p)[i], *(input.min_corner.p)[i]);
-            this->max_corner.p->at(i) = std::max(*(this->max_corner.p)[i], *(input.max_corner.p)[i]);
-        }
-    }
-};
-
-
+#undef self
 
 #endif // primitive_H
