@@ -12,10 +12,17 @@
 		C330402F176780CD0055DBA8 /* primitive_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C330402E176780CD0055DBA8 /* primitive_test.cpp */; };
 		C3304039176798980055DBA8 /* libgtest_main.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C3304037176798980055DBA8 /* libgtest_main.a */; };
 		C330403A176798980055DBA8 /* libgtest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C3304038176798980055DBA8 /* libgtest.a */; };
-		C330403D1767FFD00055DBA8 /* kd_tree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C330403B1767FFCF0055DBA8 /* kd_tree.cpp */; };
-		C330403E1767FFD00055DBA8 /* kd_tree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C330403B1767FFCF0055DBA8 /* kd_tree.cpp */; };
+		C330403D1767FFD00055DBA8 /* kdtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C330403B1767FFCF0055DBA8 /* kdtree.cpp */; };
+		C330403E1767FFD00055DBA8 /* kdtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C330403B1767FFCF0055DBA8 /* kdtree.cpp */; };
 		C3304041176801A30055DBA8 /* scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C330403F176801A30055DBA8 /* scene.cpp */; };
 		C3304042176801A30055DBA8 /* scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C330403F176801A30055DBA8 /* scene.cpp */; };
+		C3304044176808C70055DBA8 /* kdtree_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3304043176808C70055DBA8 /* kdtree_test.cpp */; };
+		C3304047176C674D0055DBA8 /* geom_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3304046176C674D0055DBA8 /* geom_test.cpp */; };
+		C330404A176C6C4A0055DBA8 /* intersection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3304049176C6C4A0055DBA8 /* intersection.cpp */; };
+		C330404B176C6C4A0055DBA8 /* intersection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3304049176C6C4A0055DBA8 /* intersection.cpp */; };
+		C330404D176C6C8F0055DBA8 /* intersection_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C330404C176C6C8E0055DBA8 /* intersection_test.cpp */; };
+		C3304050176C75B40055DBA8 /* geom_util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C330404E176C75B40055DBA8 /* geom_util.cpp */; };
+		C3304051176C75B40055DBA8 /* geom_util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C330404E176C75B40055DBA8 /* geom_util.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -48,10 +55,19 @@
 		C330402E176780CD0055DBA8 /* primitive_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = primitive_test.cpp; sourceTree = "<group>"; };
 		C3304037176798980055DBA8 /* libgtest_main.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgtest_main.a; path = test_all/lib/Debug/libgtest_main.a; sourceTree = "<group>"; };
 		C3304038176798980055DBA8 /* libgtest.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgtest.a; path = test_all/lib/Debug/libgtest.a; sourceTree = "<group>"; };
-		C330403B1767FFCF0055DBA8 /* kd_tree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = kd_tree.cpp; sourceTree = "<group>"; };
-		C330403C1767FFCF0055DBA8 /* kd_tree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kd_tree.h; sourceTree = "<group>"; };
+		C330403B1767FFCF0055DBA8 /* kdtree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = kdtree.cpp; sourceTree = "<group>"; };
+		C330403C1767FFCF0055DBA8 /* kdtree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kdtree.h; sourceTree = "<group>"; };
 		C330403F176801A30055DBA8 /* scene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = scene.cpp; sourceTree = "<group>"; };
 		C3304040176801A30055DBA8 /* scene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = scene.h; sourceTree = "<group>"; };
+		C3304043176808C70055DBA8 /* kdtree_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = kdtree_test.cpp; sourceTree = "<group>"; };
+		C3304045176C67150055DBA8 /* geom.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = geom.hpp; sourceTree = "<group>"; };
+		C3304046176C674D0055DBA8 /* geom_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = geom_test.cpp; sourceTree = "<group>"; };
+		C3304048176C6C340055DBA8 /* intersection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = intersection.h; sourceTree = "<group>"; };
+		C3304049176C6C4A0055DBA8 /* intersection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = intersection.cpp; sourceTree = "<group>"; };
+		C330404C176C6C8E0055DBA8 /* intersection_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = intersection_test.cpp; sourceTree = "<group>"; };
+		C330404E176C75B40055DBA8 /* geom_util.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = geom_util.cpp; sourceTree = "<group>"; };
+		C330404F176C75B40055DBA8 /* geom_util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = geom_util.h; sourceTree = "<group>"; };
+		C3304052176CD6DA0055DBA8 /* pair_util.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = pair_util.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,10 +114,11 @@
 				C33040251767800A0055DBA8 /* main.cpp */,
 				C33040261767800A0055DBA8 /* shape */,
 				C33040281767800A0055DBA8 /* tests */,
-				C330403C1767FFCF0055DBA8 /* kd_tree.h */,
-				C330403B1767FFCF0055DBA8 /* kd_tree.cpp */,
+				C330403C1767FFCF0055DBA8 /* kdtree.h */,
+				C330403B1767FFCF0055DBA8 /* kdtree.cpp */,
 				C3304040176801A30055DBA8 /* scene.h */,
 				C330403F176801A30055DBA8 /* scene.cpp */,
+				C3304052176CD6DA0055DBA8 /* pair_util.hpp */,
 			);
 			name = src;
 			path = ../src;
@@ -111,6 +128,11 @@
 			isa = PBXGroup;
 			children = (
 				C33040271767800A0055DBA8 /* primitive.hpp */,
+				C3304045176C67150055DBA8 /* geom.hpp */,
+				C330404F176C75B40055DBA8 /* geom_util.h */,
+				C330404E176C75B40055DBA8 /* geom_util.cpp */,
+				C3304048176C6C340055DBA8 /* intersection.h */,
+				C3304049176C6C4A0055DBA8 /* intersection.cpp */,
 			);
 			name = shape;
 			path = ../src/shape;
@@ -121,6 +143,9 @@
 			children = (
 				C33040291767800A0055DBA8 /* test_all.cpp */,
 				C330402E176780CD0055DBA8 /* primitive_test.cpp */,
+				C3304046176C674D0055DBA8 /* geom_test.cpp */,
+				C330404C176C6C8E0055DBA8 /* intersection_test.cpp */,
+				C3304043176808C70055DBA8 /* kdtree_test.cpp */,
 			);
 			name = tests;
 			path = ../src/tests;
@@ -205,8 +230,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				C330402A1767800A0055DBA8 /* main.cpp in Sources */,
-				C330403D1767FFD00055DBA8 /* kd_tree.cpp in Sources */,
+				C330403D1767FFD00055DBA8 /* kdtree.cpp in Sources */,
 				C3304041176801A30055DBA8 /* scene.cpp in Sources */,
+				C330404A176C6C4A0055DBA8 /* intersection.cpp in Sources */,
+				C3304050176C75B40055DBA8 /* geom_util.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -216,8 +243,13 @@
 			files = (
 				C330402D1767800A0055DBA8 /* test_all.cpp in Sources */,
 				C330402F176780CD0055DBA8 /* primitive_test.cpp in Sources */,
-				C330403E1767FFD00055DBA8 /* kd_tree.cpp in Sources */,
+				C330403E1767FFD00055DBA8 /* kdtree.cpp in Sources */,
 				C3304042176801A30055DBA8 /* scene.cpp in Sources */,
+				C3304044176808C70055DBA8 /* kdtree_test.cpp in Sources */,
+				C3304047176C674D0055DBA8 /* geom_test.cpp in Sources */,
+				C330404B176C6C4A0055DBA8 /* intersection.cpp in Sources */,
+				C330404D176C6C8F0055DBA8 /* intersection_test.cpp in Sources */,
+				C3304051176C75B40055DBA8 /* geom_util.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
