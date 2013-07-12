@@ -54,14 +54,17 @@ TEST_F(GeomTest, triangleTest1)
         0.0, 0.0, 0.0,
         1.0, 1.0, 0.0,
         1.0, 1.0, 1.0};
+    double n_array[] = {
+        0.0, 0.0, 0.0,
+    };
     double tex_array[] = {
         0.0, 0.0,
         1.0, 0.0,
         1.0, 1.0};
     std::vector<Vertex> vertexes;
-    vertexes.push_back(Vertex(pos_array+0, tex_array+0, 0));
-    vertexes.push_back(Vertex(pos_array+3, tex_array+2, 0));
-    vertexes.push_back(Vertex(pos_array+6, tex_array+4, 0));
+    vertexes.push_back(Vertex(pos_array+0, n_array, tex_array+0, 0));
+    vertexes.push_back(Vertex(pos_array+3, n_array, tex_array+2, 0));
+    vertexes.push_back(Vertex(pos_array+6, n_array, tex_array+4, 0));
     Triangle triangle0(0,1,2);
     EXPECT_EQ(triangle0.ids[0], 0);
     EXPECT_EQ(triangle0.ids[1], 1);
@@ -77,9 +80,9 @@ TEST_F(GeomTest, triangleTest1)
 
 TEST_F(GeomTest, triangleTest2)
 {
-    Vertex v0(Vec3(1.0,1.0,1.0), Vec2(0.0,0.0), 0);
-    Vertex v1(Vec3(-1.0,1.0,1.0), Vec2(0.0,0.0), 0);
-    Vertex v2(Vec3(-1.0,1.0,-1.0), Vec2(0.0,0.0), 0);
+    Vertex v0(Vec3(1.0,1.0,1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
+    Vertex v1(Vec3(-1.0,1.0,1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
+    Vertex v2(Vec3(-1.0,1.0,-1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
     std::vector<Vertex > vertexes;
     vertexes.push_back(v0);
     vertexes.push_back(v1);

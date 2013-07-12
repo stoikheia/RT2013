@@ -119,3 +119,9 @@ bool AABB::does_intersect(const Vec3 &v0, const Vec3 &v1, const Vec3 &v2) const 
     return false;
 }
 
+
+bool AABB::does_intersect(const Ray &ray) const {
+    //TODO
+    return false;
+}
+

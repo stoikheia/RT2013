@@ -33,41 +33,85 @@ struct Ray {
         return 0 == memcmp(this, &ray, sizeof(Ray));
     }
     
-    bool get_intersection_length(const Plane &plane, real &ret) const {
-        real denominator = plane.n.dot(n);
+    //ray2plane
+    bool get_intersection_length(const Plane &plane, real &ret, real &direction) const {
+        direction = plane.n.dot(n);
         real distance = o.dot(plane.n);
         
         if(plane.d == -distance) {
             ret = type_traits<real>::zero();
             return true;//both start and end is on the plane
         }
-        if(type_traits<real>::zero() == denominator) {
+        if(type_traits<real>::zero() == direction) {
             return false;//orthogonal (and not on the plane)
         }
         
         //ret = (-distance - plane.d) / denominator;//memo : similar to formura
-        ret = -(distance + plane.d) / denominator;
+        ret = -(distance + plane.d) / direction;
         return true;//intersection (positive or negative)
     }
-
-    bool get_intersection_point(const Plane &plane, Vec3 &ret) const {
-
-        real tt;
-        if(!get_intersection_length(plane, tt)) {
-            return false;//orthogonal
+    bool get_intersection_length(const Plane &plane, real &ret) const {
+        real direction;
+        return get_intersection_length(plane, ret, direction);
+    }
+    
+    bool get_intersection_point(const Plane &plane, Vec3 &ret, real &length, real &direction) const {
+        
+        if(!get_intersection_length(plane, length, direction)) {
+            return false;//orthogonal and not on the plane
         }
-        if(type_traits<real>::zero() <= tt && tt <= t) {
-            ret.x() = o.x() + n.x() * tt; ret.y() = o.y() + n.y() * tt; ret.z() = o.z() + n.z() * tt;
+        if(type_traits<real>::zero() <= length && length <= t) {
+            //ret = o + n * length;//slow
+            ret.x() = o.x() + n.x() * length; ret.y() = o.y() + n.y() * length; ret.z() = o.z() + n.z() * length;//fast
             return true;
         } else {
             return false;
         }
     }
+    bool get_intersection_point(const Plane &plane, Vec3 &ret, real &length) const {
+        real direction;
+        return get_intersection_point(plane, ret, length, direction);
+    }
+    bool get_intersection_point(const Plane &plane, Vec3 &ret) const {
+        real tt;
+        return get_intersection_point(plane, ret, tt);
+    }
+    
+    //ray2triangle
+    template<typename Conteiner>
+    bool get_intersection_point(const Triangle &tri, const Conteiner &vertexes, Vec3 &ret, real &length, real &direction) const {
+        if(get_intersection_point(tri.create_plane(vertexes), ret, length, direction)) {
+            Vec3 normal;
+            if(direction <= 0) {
+                normal = self.n * -1.0;
+            } else {
+                normal = self.n;
+            }
+            if( (((vertexes[tri.ids[1]].p - vertexes[tri.ids[0]].p).cross(ret - vertexes[tri.ids[0]].p)).dot(normal) >= 0) &&
+               (((vertexes[tri.ids[2]].p - vertexes[tri.ids[1]].p).cross(ret - vertexes[tri.ids[1]].p)).dot(normal) >= 0) &&
+               (((vertexes[tri.ids[0]].p - vertexes[tri.ids[2]].p).cross(ret - vertexes[tri.ids[2]].p)).dot(normal) >= 0) ) {
+                return true;
+            }
+        }
+        return false;
+    }
+    template<typename Conteiner>
+    bool get_intersection_point(const Triangle &tri, const Conteiner &vertexes, Vec3 &ret, real &length) const {
+        real direction;
+        return get_intersection_point(tri, vertexes, ret, length, direction);
+    }
+    template<typename Conteiner>
+    bool get_intersection_point(const Triangle &tri, const Conteiner &vertexes, Vec3 &ret) const {
+        real tt;
+        return get_intersection_point(tri, vertexes, ret, tt);
+    }
 
+    //clipping
     bool get_cliped(const Plane &plane, Ray &ret) const {
         
         real tt;
-        if(!get_intersection_length(plane, tt)) {//orthogonal
+        real direction;
+        if(!get_intersection_length(plane, tt, direction)) {//orthogonal
             if(0 < plane.n.dot(o) + plane.d) {
                 ret = self;//ray is front of the plane
                 return true;
@@ -76,10 +120,9 @@ struct Ray {
             }
         }
         
-        real dir = plane.n.dot(n);
-        if(type_traits<real>::zero() <= dir) {//same direction
+        if(direction >= 0) {//same direction or orthogonal
             if(type_traits<real>::zero() <= tt) {
-                if(tt < t) {
+                if(tt <= t) {
                     ret = Ray(o + n * tt, n, t - tt);//clip : start
                 } else {
                     return false;//start/end are behind the plane.
@@ -89,7 +132,7 @@ struct Ray {
             }
         } else {//opposite direction
             if(type_traits<real>::zero() <= tt) {
-                if(tt < t) {
+                if(tt <= t) {
                     ret = Ray(o, n, tt);//clip : end
                 } else {
                     ret = self;//start/end are front of the plane.
@@ -101,11 +144,12 @@ struct Ray {
         return true;
     }
     
-    std::pair<Vec3, Vec3> get_points() const {
+    //utilities
+    std::pair<Vec3, Vec3> get_points() const {// points of ray starting and end
         return std::pair<Vec3, Vec3>(o, o + n * t);
     }
 
-    static Ray create_start_end(const Vec3 &s, const Vec3 &e) {
+    static Ray create_start_end(const Vec3 &s, const Vec3 &e) {// creating ray from start and end
         Vec3 dir(e - s);
         real len = dir.length();
         return Ray(s,
@@ -131,22 +175,25 @@ struct AABB {
     AABB(const Vec3 &input_min_corner, const Vec3 &input_max_corner)
         :min_corner(input_min_corner),max_corner(input_max_corner) {}
 
-    template<typename Conteiner>
-    AABB(const Triangle &tri, const Conteiner &vertexes) {
-        static_assert(std::is_same<typename Conteiner::iterator::iterator_category, std::random_access_iterator_tag>::value,
-                "AABB triangle initializer doesnt accept if it is not random access iterator.");
-        min_corner = vertexes[tri.ids[0]].p; max_corner = vertexes[tri.ids[0]].p;
-        for(size_t i = 1; i < 3; ++i) {
-            for(size_t j = 0; j < 3; ++j) {//xyz
-                min_corner[j] = std::min(min_corner[j], vertexes[tri.ids[i]].p[j]);
-                max_corner[j] = std::max(max_corner[j], vertexes[tri.ids[i]].p[j]);
-            }
-        }
-    }
-
     AABB(const Sphere &input)
     :min_corner(input.p.x() - input.r, input.p.y() - input.r, input.p.z() - input.r),
     max_corner(input.p.x() + input.r, input.p.y() + input.r, input.p.z() + input.r) {}
+    
+    template<typename Conteiner>
+    AABB(const Triangle &tri, const Conteiner &vertexes) {
+        
+        static_assert(std::is_same<typename Conteiner::iterator::iterator_category, std::random_access_iterator_tag>::value,
+                      "AABB triangle initializer doesnt accept if it is not random access iterator.");
+        
+        for(size_t i = 0; i < 3; ++i) {//xyz
+            self.min_corner.e[i] = std::min(vertexes[tri.ids[0]].p[i],
+                                            std::min(vertexes[tri.ids[1]].p[i],
+                                                     vertexes[tri.ids[2]].p[i]));
+            self.max_corner.e[i] = std::max(vertexes[tri.ids[0]].p[i],
+                                            std::max(vertexes[tri.ids[1]].p[i],
+                                                     vertexes[tri.ids[2]].p[i]));
+        }
+    }
 
     void merge(const AABB &input) {
         for(size_t i = 0; i < 3; ++i) {
@@ -158,13 +205,17 @@ struct AABB {
     void create_edges(std::vector<Ray> &ret) const;
     
     bool get_intersection_points(const Plane &plane, std::vector<Vec3> &ret) const;
-
+    
+    //triangle
     template<typename Conteiner>
     bool does_intersect(const Triangle &tri, const Conteiner &vertexes) const {
         //template currying
         return does_intersect(vertexes[tri.ids[0]].p, vertexes[tri.ids[1]].p, vertexes[tri.ids[2]].p);
     }
+    //point
     bool does_intersect(const Vec3 &v0, const Vec3 &v1, const Vec3 &v2) const;
+    //ray
+    bool does_intersect(const Ray &ray) const;
 };
 
 

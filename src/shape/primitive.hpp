@@ -345,6 +345,7 @@ struct Vertex {
     typedef real scalar_t;
     
     Vec3 p;//pos
+    Vec3 n;//normal
     Vec2 t;//tex
     size_t m;//mat id
     
@@ -356,12 +357,12 @@ struct Vertex {
     Vertex& operator=(const Vertex &) = default;
     Vertex& operator=(Vertex &&) = default;
     
-    Vertex(const Vec3 &p_, const Vec2 &t_, size_t m_)
-    :p(p_),t(t_),m(m_) {}
-    Vertex(const real *p_, const real *t_, size_t m_)
-    :p(p_),t(t_),m(m_) {}
-    Vertex(const real p_, const real t_, size_t m_)
-    :p(p_),t(t_),m(m_) {}
+    Vertex(const Vec3 &p_, const Vec3 &n_, const Vec2 &t_, size_t m_)
+    :p(p_),n(n_),t(t_),m(m_) {}
+    Vertex(const real *p_, const real *n_, const real *t_, size_t m_)
+    :p(p_),n(n_),t(t_),m(m_) {}
+    Vertex(real p_, real n_, real t_, size_t m_)
+    :p(p_),n(n_),t(t_),m(m_) {}
 };
 static_assert(std::is_pod<Vertex>::value, "Vertex is not POD.");
 

@@ -32,14 +32,16 @@ TEST_F(IntersectionTest, AABBTest1)
         0.0, 0.0, 0.0,
         1.0, 1.0, 0.0,
         1.0, 1.0, 1.0};
+    real n_array[] = {
+        1.0, 0.0, 0.0};
     real tex_array[] = {
         0.0, 0.0,
         1.0, 0.0,
         1.0, 1.0};
     std::vector<Vertex> vertexes;
-    vertexes.push_back(Vertex(pos_array+0, tex_array+0, 0));
-    vertexes.push_back(Vertex(pos_array+3, tex_array+2, 0));
-    vertexes.push_back(Vertex(pos_array+6, tex_array+4, 0));
+    vertexes.push_back(Vertex(pos_array+0, n_array, tex_array+0, 0));
+    vertexes.push_back(Vertex(pos_array+3, n_array, tex_array+2, 0));
+    vertexes.push_back(Vertex(pos_array+6, n_array, tex_array+4, 0));
     Triangle triangle0(0,1,2);
     
     AABB aabb_tri(triangle0, vertexes);
@@ -96,13 +98,13 @@ TEST_F(IntersectionTest, clippingTest1)
     Ray ray(rayv, normal.to_normal(), 3.0);
     
     Vec3 point;
-    EXPECT_TRUE(ray.get_intersection_point(plane, point));
+    ASSERT_TRUE(ray.get_intersection_point(plane, point));
     EXPECT_REAL_EQ(point.x(), 0.0);
     EXPECT_REAL_EQ(point.y(), 0.0);
     EXPECT_REAL_EQ(point.z(), 1.0);
     
     Ray ret;
-    EXPECT_TRUE(ray.get_cliped(plane, ret));
+    ASSERT_TRUE(ray.get_cliped(plane, ret));
     EXPECT_REAL_EQ(ret.o.x(), 0.0);
     EXPECT_REAL_EQ(ret.o.y(), 1.0);
     EXPECT_REAL_EQ(ret.o.z(), 0.0);
@@ -116,16 +118,16 @@ TEST_F(IntersectionTest, clippingTest1)
 TEST_F(IntersectionTest, clippingTest2)
 {
     real planev[] = {0.0,0.0,1.0};
-    Plane plane(planev, 1.0);//negative direction
+    Plane plane(planev, 1.0);
     real normald[] = {0.0,-1.0,1.0};
     Vec3 normal(normald);
     real rayv[] = {0.0,1.0,0.0};
     Ray ray(rayv, normal.to_normal(), 3.0);
     
     Vec3 point;
-    EXPECT_FALSE(ray.get_intersection_point(plane, point));
+    ASSERT_FALSE(ray.get_intersection_point(plane, point));
     Ray ret;
-    EXPECT_TRUE(ray.get_cliped(plane, ret));//start and end are on the plane
+    ASSERT_TRUE(ray.get_cliped(plane, ret));//start and end are front of the plane
 }
 TEST_F(IntersectionTest, clippingTest3)
 {
@@ -137,9 +139,9 @@ TEST_F(IntersectionTest, clippingTest3)
     Ray ray(rayv, normal.to_normal(), 1.0);//short
     
     Vec3 point;
-    EXPECT_FALSE(ray.get_intersection_point(plane, point));
+    ASSERT_FALSE(ray.get_intersection_point(plane, point));
     Ray ret;
-    EXPECT_TRUE(ray.get_cliped(plane, ret));//start and end are on the plane
+    ASSERT_TRUE(ray.get_cliped(plane, ret));//start and end are front of the plane
 }
 
 TEST_F(IntersectionTest, clippingTest3_2)
@@ -152,9 +154,9 @@ TEST_F(IntersectionTest, clippingTest3_2)
     Ray ray(rayv, normal.to_normal(), 3.0);
     
     Vec3 point;
-    EXPECT_FALSE(ray.get_intersection_point(plane, point));
+    ASSERT_FALSE(ray.get_intersection_point(plane, point));
     Ray ret;
-    EXPECT_FALSE(ray.get_cliped(plane, ret));//start and end are behind the plane
+    ASSERT_FALSE(ray.get_cliped(plane, ret));//start and end are behind the plane
 }
 
 TEST_F(IntersectionTest, clippingTest4)//inv face clipping test
@@ -167,13 +169,10 @@ TEST_F(IntersectionTest, clippingTest4)//inv face clipping test
     Ray ray(rayv, normal.to_normal(), 3.0);
     
     Vec3 point;
-    EXPECT_TRUE(ray.get_intersection_point(plane, point));
-    EXPECT_REAL_EQ(point.x(), 0.0);
-    EXPECT_REAL_EQ(point.y(), 0.0);
-    EXPECT_REAL_EQ(point.z(), -1.0);
+    ASSERT_TRUE(ray.get_intersection_point(plane, point));
     
     Ray ret;
-    EXPECT_TRUE(ray.get_cliped(plane, ret));
+    ASSERT_TRUE(ray.get_cliped(plane, ret));
     EXPECT_REAL_EQ(ret.o.x(), 0.0);
     EXPECT_REAL_EQ(ret.o.y(), 0.0);
     EXPECT_REAL_EQ(ret.o.z(), -1.0);
@@ -183,7 +182,8 @@ TEST_F(IntersectionTest, clippingTest4)//inv face clipping test
     EXPECT_REAL_EQ(ret.t, 3.0 - sqrt(2.0));
     
 }
-TEST_F(IntersectionTest, clippingTest5)//orthogonal test
+
+TEST_F(IntersectionTest, clippingTest5)//orthogonal and on the plane test
 {
     real planev[] = {0.0,-1.0,0.0};
     Plane plane(planev, 1.0);
@@ -193,17 +193,240 @@ TEST_F(IntersectionTest, clippingTest5)//orthogonal test
     Ray ray(rayv, normal.to_normal(), 1.0);
     
     Vec3 point;
-    EXPECT_TRUE(ray.get_intersection_point(plane, point));
+    ASSERT_TRUE(ray.get_intersection_point(plane, point));
     EXPECT_REAL_EQ(point.x(), 0.0);
     EXPECT_REAL_EQ(point.y(), 1.0);
     EXPECT_REAL_EQ(point.z(), 0.0);
     Ray ret;
-    EXPECT_TRUE(ray.get_cliped(plane, ret));
+    ASSERT_TRUE(ray.get_cliped(plane, ret));
     EXPECT_REAL_EQ(ret.o.x(), 0.0);
     EXPECT_REAL_EQ(ret.o.y(), 1.0);
     EXPECT_REAL_EQ(ret.o.z(), 0.0);
     EXPECT_EQ(ret.n, normal);
     EXPECT_REAL_EQ(ret.t, 1.0);
+}
+
+TEST_F(IntersectionTest, clippingTest6_1)//start is on the plane (and same direction)
+{
+    real planev[] = {0.0,-1.0,0.0};
+    Plane plane(planev, 1.0);
+    real normalv[] = {0.0,-1.0,0.0};
+    Vec3 normal(normalv);
+    real rayv[] = {0.0,1.0,0.0};
+    Ray ray(rayv, normal.to_normal(), 1.0);
+    
+    Vec3 point;
+    ASSERT_TRUE(ray.get_intersection_point(plane, point));
+    EXPECT_REAL_EQ(point.x(), 0.0);
+    EXPECT_REAL_EQ(point.y(), 1.0);
+    EXPECT_REAL_EQ(point.z(), 0.0);
+    Ray ret;
+    ASSERT_TRUE(ray.get_cliped(plane, ret));
+    EXPECT_REAL_EQ(ret.o.x(), 0.0);
+    EXPECT_REAL_EQ(ret.o.y(), 1.0);
+    EXPECT_REAL_EQ(ret.o.z(), 0.0);
+    EXPECT_EQ(ret.n, normal);
+    EXPECT_REAL_EQ(ret.t, 1.0);
+}
+
+TEST_F(IntersectionTest, clippingTest6_2)//start is on the plane (and opposite direction)
+{
+    real planev[] = {0.0,-1.0,0.0};
+    Plane plane(planev, 1.0);
+    real normalv[] = {0.0,1.0,0.0};
+    Vec3 normal(normalv);
+    real rayv[] = {0.0,1.0,0.0};
+    Ray ray(rayv, normal.to_normal(), 1.0);
+    
+    Vec3 point;
+    ASSERT_TRUE(ray.get_intersection_point(plane, point));
+    EXPECT_REAL_EQ(point.x(), 0.0);
+    EXPECT_REAL_EQ(point.y(), 1.0);
+    EXPECT_REAL_EQ(point.z(), 0.0);
+    Ray ret;
+    ASSERT_TRUE(ray.get_cliped(plane, ret));
+    EXPECT_REAL_EQ(ret.o.x(), 0.0);
+    EXPECT_REAL_EQ(ret.o.y(), 1.0);
+    EXPECT_REAL_EQ(ret.o.z(), 0.0);
+    EXPECT_EQ(ret.n, normal);
+    EXPECT_REAL_EQ(ret.t, 0.0);
+}
+
+TEST_F(IntersectionTest, intersectionTestTriangle1_1)//positive face
+{
+    Vertex v0(Vec3(1.0,1.0,1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
+    Vertex v1(Vec3(-1.0,1.0,1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
+    Vertex v2(Vec3(-1.0,1.0,-1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
+    std::vector<Vertex > vertexes;
+    vertexes.push_back(v0);
+    vertexes.push_back(v1);
+    vertexes.push_back(v2);
+    
+    Triangle triangle(0,1,2);
+    
+    Ray ray(Vec3(0.0, 0.5, 0.0), Vec3(0.0, 1.0, 0.0).to_normal(), 1.0);
+    
+    Vec3 ret;
+    ASSERT_TRUE(ray.get_intersection_point(triangle, vertexes, ret));
+    EXPECT_REAL_EQ(ret.x(), 0.0);
+    EXPECT_REAL_EQ(ret.y(), 1.0);
+    EXPECT_REAL_EQ(ret.z(), 0.0);
+}
+
+TEST_F(IntersectionTest, intersectionTestTriangle1_2)//negative face
+{
+    Vertex v0(Vec3(1.0,1.0,1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
+    Vertex v1(Vec3(-1.0,1.0,1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
+    Vertex v2(Vec3(-1.0,1.0,-1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
+    std::vector<Vertex > vertexes;
+    vertexes.push_back(v0);
+    vertexes.push_back(v1);
+    vertexes.push_back(v2);
+    
+    Triangle triangle(0,1,2);
+    
+    Ray ray(Vec3(0.0, 1.5, 0.0), Vec3(0.0, -1.0, 0.0).to_normal(), 1.0);
+    
+    Vec3 ret;
+    ASSERT_TRUE(ray.get_intersection_point(triangle, vertexes, ret));
+    EXPECT_REAL_EQ(ret.x(), 0.0);
+    EXPECT_REAL_EQ(ret.y(), 1.0);
+    EXPECT_REAL_EQ(ret.z(), 0.0);
+}
+
+TEST_F(IntersectionTest, intersectionTestTriangle1_3)//intersection point is out of triangle (positive)
+{
+    Vertex v0(Vec3(1.0,1.0,1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
+    Vertex v1(Vec3(-1.0,1.0,1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
+    Vertex v2(Vec3(-1.0,1.0,-1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
+    std::vector<Vertex > vertexes;
+    vertexes.push_back(v0);
+    vertexes.push_back(v1);
+    vertexes.push_back(v2);
+    
+    Triangle triangle(0,1,2);
+    
+    Ray ray(Vec3(1.0, 0.5, 0.0), Vec3(0.0, 1.0, 0.0).to_normal(), 1.0);
+    
+    Vec3 ret;
+    ASSERT_FALSE(ray.get_intersection_point(triangle, vertexes, ret));
+}
+
+TEST_F(IntersectionTest, intersectionTestTriangle1_4)//intersection point is out of triangle (negative)
+{
+    Vertex v0(Vec3(1.0,1.0,1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
+    Vertex v1(Vec3(-1.0,1.0,1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
+    Vertex v2(Vec3(-1.0,1.0,-1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
+    std::vector<Vertex > vertexes;
+    vertexes.push_back(v0);
+    vertexes.push_back(v1);
+    vertexes.push_back(v2);
+    
+    Triangle triangle(0,1,2);
+    
+    Ray ray(Vec3(1.0, 1.5, 0.0), Vec3(0.0, -1.0, 0.0).to_normal(), 1.0);
+    
+    Vec3 ret;
+    ASSERT_FALSE(ray.get_intersection_point(triangle, vertexes, ret));
+}
+
+TEST_F(IntersectionTest, intersectionTestTriangle1_5)//no intersection, ray is behind the plane
+{
+    Vertex v0(Vec3(1.0,1.0,1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
+    Vertex v1(Vec3(-1.0,1.0,1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
+    Vertex v2(Vec3(-1.0,1.0,-1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
+    std::vector<Vertex > vertexes;
+    vertexes.push_back(v0);
+    vertexes.push_back(v1);
+    vertexes.push_back(v2);
+    
+    Triangle triangle(0,1,2);
+    
+    Ray ray(Vec3(0.0, -1.0, 0.0), Vec3(0.0, 1.0, 0.0).to_normal(), 1.0);
+    
+    Vec3 ret;
+    ASSERT_FALSE(ray.get_intersection_point(triangle, vertexes, ret));
+}
+
+TEST_F(IntersectionTest, intersectionTestTriangle1_6)//no intersection, ray is front of the plane
+{
+    Vertex v0(Vec3(1.0,1.0,1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
+    Vertex v1(Vec3(-1.0,1.0,1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
+    Vertex v2(Vec3(-1.0,1.0,-1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
+    std::vector<Vertex > vertexes;
+    vertexes.push_back(v0);
+    vertexes.push_back(v1);
+    vertexes.push_back(v2);
+    
+    Triangle triangle(0,1,2);
+    
+    Ray ray(Vec3(0.0, 1.5, 0.0), Vec3(0.0, 1.0, 0.0).to_normal(), 1.0);
+    
+    Vec3 ret;
+    ASSERT_FALSE(ray.get_intersection_point(triangle, vertexes, ret));
+}
+
+TEST_F(IntersectionTest, intersectionTestTriangle1_7)//orthogonal and on the plane
+{
+    Vertex v0(Vec3(1.0,1.0,1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
+    Vertex v1(Vec3(-1.0,1.0,1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
+    Vertex v2(Vec3(-1.0,1.0,-1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
+    std::vector<Vertex > vertexes;
+    vertexes.push_back(v0);
+    vertexes.push_back(v1);
+    vertexes.push_back(v2);
+    
+    Triangle triangle(0,1,2);
+    
+    Ray ray(Vec3(0.0, 1.0, 0.0), Vec3(1.0, 0.0, 0.0).to_normal(), 1.0);
+    
+    Vec3 ret;
+    ASSERT_TRUE(ray.get_intersection_point(triangle, vertexes, ret));
+    EXPECT_REAL_EQ(ret.x(), 0.0);
+    EXPECT_REAL_EQ(ret.y(), 1.0);
+    EXPECT_REAL_EQ(ret.z(), 0.0);
+}
+
+TEST_F(IntersectionTest, intersectionTestTriangle1_8)//ray start is on the plane
+{
+    Vertex v0(Vec3(1.0,1.0,1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
+    Vertex v1(Vec3(-1.0,1.0,1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
+    Vertex v2(Vec3(-1.0,1.0,-1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
+    std::vector<Vertex > vertexes;
+    vertexes.push_back(v0);
+    vertexes.push_back(v1);
+    vertexes.push_back(v2);
+    
+    Triangle triangle(0,1,2);
+    
+    Ray ray(Vec3(0.0, 1.0, 0.0), Vec3(0.0, 1.0, 0.0).to_normal(), 1.0);
+    
+    Vec3 ret;
+    ASSERT_TRUE(ray.get_intersection_point(triangle, vertexes, ret));
+    EXPECT_REAL_EQ(ret.x(), 0.0);
+    EXPECT_REAL_EQ(ret.y(), 1.0);
+    EXPECT_REAL_EQ(ret.z(), 0.0);
+}
+
+TEST_F(IntersectionTest, intersectionTestTriangle1_9)//ray end is on the plane
+{
+    Vertex v0(Vec3(1.0,1.0,1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
+    Vertex v1(Vec3(-1.0,1.0,1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
+    Vertex v2(Vec3(-1.0,1.0,-1.0), Vec3(0.0), Vec2(0.0,0.0), 0);
+    std::vector<Vertex > vertexes;
+    vertexes.push_back(v0);
+    vertexes.push_back(v1);
+    vertexes.push_back(v2);
+    
+    Triangle triangle(0,1,2);
+    
+    Ray ray(Vec3(0.0, 0.0, 0.0), Vec3(0.0, 1.0, 0.0).to_normal(), 1.0);
+    
+    Vec3 ret;
+    ASSERT_TRUE(ray.get_intersection_point(triangle, vertexes, ret));
+    EXPECT_REAL_EQ(ret.x(), 0.0);
+    EXPECT_REAL_EQ(ret.y(), 1.0);
+    EXPECT_REAL_EQ(ret.z(), 0.0);
 }
 
 TEST_F(IntersectionTest, aabbEdgeTest1)
@@ -340,9 +563,9 @@ TEST_F(IntersectionTest, aabbPlaneIntersectionTest2) {
 TEST_F(IntersectionTest, aabbTriangleIntersectionTest1) {
    
     Vertex vertexes[] = {
-        Vertex(Vec3(0.5,1.0,-0.5),Vec2(0.0,0.0),0),
-        Vertex(Vec3(-0.5,1.0,-0.5),Vec2(0.0,0.0),0),
-        Vertex(Vec3(0.0,1.0,0.5),Vec2(0.0,0.0),0),
+        Vertex(Vec3(0.5,1.0,-0.5), Vec3(0.0), Vec2(0.0,0.0),0),
+        Vertex(Vec3(-0.5,1.0,-0.5), Vec3(0.0),Vec2(0.0,0.0),0),
+        Vertex(Vec3(0.0,1.0,0.5), Vec3(0.0),Vec2(0.0,0.0),0),
     };
 
     Triangle triangles[] = {
