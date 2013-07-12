@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C305037A17838A240071EA81 /* obj_io.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C305037817838A240071EA81 /* obj_io.cpp */; };
+		C305037B17838A240071EA81 /* obj_io.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C305037817838A240071EA81 /* obj_io.cpp */; };
 		C330402A1767800A0055DBA8 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C33040251767800A0055DBA8 /* main.cpp */; };
 		C330402D1767800A0055DBA8 /* test_all.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C33040291767800A0055DBA8 /* test_all.cpp */; };
 		C330402F176780CD0055DBA8 /* primitive_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C330402E176780CD0055DBA8 /* primitive_test.cpp */; };
@@ -47,6 +49,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		C305037817838A240071EA81 /* obj_io.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = obj_io.cpp; sourceTree = "<group>"; };
+		C305037917838A240071EA81 /* obj_io.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = obj_io.h; sourceTree = "<group>"; };
 		C3303FFD176777930055DBA8 /* RT2013 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = RT2013; sourceTree = BUILT_PRODUCTS_DIR; };
 		C330401917677C440055DBA8 /* test_all */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = test_all; sourceTree = BUILT_PRODUCTS_DIR; };
 		C33040251767800A0055DBA8 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
@@ -116,6 +120,8 @@
 				C33040281767800A0055DBA8 /* tests */,
 				C330403C1767FFCF0055DBA8 /* kdtree.h */,
 				C330403B1767FFCF0055DBA8 /* kdtree.cpp */,
+				C305037917838A240071EA81 /* obj_io.h */,
+				C305037817838A240071EA81 /* obj_io.cpp */,
 				C3304040176801A30055DBA8 /* scene.h */,
 				C330403F176801A30055DBA8 /* scene.cpp */,
 				C3304052176CD6DA0055DBA8 /* pair_util.hpp */,
@@ -234,6 +240,7 @@
 				C3304041176801A30055DBA8 /* scene.cpp in Sources */,
 				C330404A176C6C4A0055DBA8 /* intersection.cpp in Sources */,
 				C3304050176C75B40055DBA8 /* geom_util.cpp in Sources */,
+				C305037A17838A240071EA81 /* obj_io.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -250,6 +257,7 @@
 				C330404B176C6C4A0055DBA8 /* intersection.cpp in Sources */,
 				C330404D176C6C8F0055DBA8 /* intersection_test.cpp in Sources */,
 				C3304051176C75B40055DBA8 /* geom_util.cpp in Sources */,
+				C305037B17838A240071EA81 /* obj_io.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
