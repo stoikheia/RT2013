@@ -68,5 +68,10 @@ TEST_F(PrimitiveTest, primitiveTest1)
     //ASSERT_TRUE(mat0.e == NULL);
     
 }
+TEST_F(PrimitiveTest, primitiveTest2) {
+    Vec3 v0(1.0);
+    Vec3 v1(1.0,1.0,1.0);
+    ASSERT_TRUE(v0 == v1);
+}
 
 

@@ -74,6 +74,9 @@ static inline bool is_ccw(const Vec3 &n, const Vec3 &v) {
 }
 
 bool AABB::does_intersect(const Vec3 &v0, const Vec3 &v1, const Vec3 &v2) const {
+    if(v0.equal_aproximation(v1) || v1.equal_aproximation(v2) || v2.equal_aproximation(v0)) {
+        return false;
+    }
     Plane plane = Triangle::create_plane(v0,v1,v2);
     //getting points on plane
     std::vector<Vec3> points;
@@ -83,13 +86,24 @@ bool AABB::does_intersect(const Vec3 &v0, const Vec3 &v1, const Vec3 &v2) const 
     if(!points.size()) {//no intersection (orthogonal)
         return false;
     }
+    
+    //unique
+    std::sort(points.begin(),points.end(), [](const Vec3 &l, const Vec3 &r) -> bool {
+        if(l.x() <= r.x() && l.y() <= r.y() && l.z() < r.z()) return true;
+        else return false;
+    });
+    auto unique_end = std::unique(points.begin(), points.end(), [](const Vec3 &l, const Vec3 &r) -> bool {
+        return l.equal_aproximation(r);
+    });
+    points.erase(unique_end, points.end());
+    
     if(points.size() > 2) {
         //checking each points
         std::vector<size_t> convex_hull_indexes;
         if(!ConvexHull2D::create(plane, points ,convex_hull_indexes)) {
             assert(0);
         }
-        assert(convex_hull_indexes.size() == points.size());
+        //assert(convex_hull_indexes.size() == points.size());
         //checking any of a triangle vertex is in all of convex_hull edges.
         const Vec3 *v_array[] = {&v0, &v1, &v2};
         for(size_t i = 0; i < 3; ++i) {

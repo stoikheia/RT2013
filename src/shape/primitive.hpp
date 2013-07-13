@@ -121,6 +121,11 @@ struct Vec2 {
         return 0==memcmp(this, &vec, sizeof(Vec2));
     }
     
+    bool equal_aproximation(const Vec2 &vec) const {
+        return (std::abs(self.e[0] - vec.e[0]) < 1.0e-10 &&
+                std::abs(self.e[1] - vec.e[1]) < 1.0e-10);
+    }
+    
     iterator begin() {return e;}
     iterator end() {return (&e[0])+N;}
     const_iterator begin() const {return e;}
@@ -165,6 +170,12 @@ struct Vec3 {
     
     bool operator==(const Vec3 &vec) const {
         return 0==memcmp(this, &vec, sizeof(Vec3));
+    }
+    
+    bool equal_aproximation(const Vec3 &vec) const {
+        return (std::abs(self.e[0] - vec.e[0]) < 1.0e-10 &&
+                std::abs(self.e[1] - vec.e[1]) < 1.0e-10 &&
+                std::abs(self.e[2] - vec.e[2]) < 1.0e-10);
     }
     
     iterator begin() {return e;}
@@ -286,6 +297,13 @@ struct Vec4 {
     
     bool operator==(const Vec4 &vec) const {
         return 0==memcmp(this, &vec, sizeof(Vec4));
+    }
+    
+    bool equal_aproximation(const Vec4 &vec) const {
+        return (std::abs(self.e[0] - vec.e[0]) < 1.0e-10 &&
+                std::abs(self.e[1] - vec.e[1]) < 1.0e-10 &&
+                std::abs(self.e[2] - vec.e[2]) < 1.0e-10 &&
+                std::abs(self.e[3] - vec.e[3]) < 1.0e-10);
     }
     
     iterator begin() {return e;}

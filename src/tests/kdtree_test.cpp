@@ -93,7 +93,7 @@ TEST_F(KDTreeTest, meshTest1)
     
     {
         TimeCount tc("load_obj_vnf");
-        ASSERT_TRUE(load_obj_vnf("./buddha2.obj", triangles, vertexes));
+        ASSERT_TRUE(load_obj_vnf("./buddha3.obj", triangles, vertexes));
         tc.display_now();
     }
     
@@ -160,6 +160,64 @@ TEST_F(KDTreeTest, meshTest1)
             ASSERT_TRUE(length != type_traits<real>::inf());
         }
     }
+    
+#if 0
+    {
+        TimeCount tc("kdtree creation");
+        KdTree kdtree(aabbs, triangles, vertexes);
+        tc.display_now();
+        {
+            Ray ray(Vec3(-5.0), Vec3(1.0,1.0,1.0).to_normal());
+            std::vector<std::vector<size_t> > ret;
+            TimeCount tc("hierarchy search1");
+            kdtree.get_intersection_hierarchy_ids(ray, ret);
+            tc.display_now();
+            size_t num_aabb = 0;
+            for(size_t i = 0; i < ret.size(); ++i) {
+                std::cout << "ret sub size : "<< i << " : " << ret[i].size() << std::endl;
+                num_aabb += ret[i].size();
+            }
+            std::cout << "num kdtree area : " << ret.size() << std::endl;
+            std::cout << "ret size : " << num_aabb << std::endl;
+        }
+        {
+            Ray ray(Vec3(-5.0), Vec3(1.0,1.0,1.0).to_normal());
+            std::vector<size_t> ret;
+            TimeCount tc("leaf search1");
+            kdtree.get_intersection_leaf_ids(ray, ret);
+            tc.display_now();
+            for(size_t i = 0; i < ret.size(); ++i) {
+                std::cout << "ret id : "<< i << " : " << ret[i] << std::endl;
+            }
+            std::cout << "num kdtree area : " << ret.size() << std::endl;
+            
+            //has intersection?
+            real length = type_traits<real>::inf();
+            Vec3 point;
+            for(size_t i = 0; i < ret.size(); ++i) {
+                //std::cout << "ret id : "<< i << " : " << ret[i] << std::endl;
+                const std::vector<size_t> &ids = kdtree.get_ids_by_element_id(ret[i]);
+                for(size_t j = 0; j < ids.size(); ++j) {
+                    Vec3 ret;
+                    real len, direction;
+                    real min_length = length;//for checking min:i.block <= min:(i+1).block
+                    if(ray.get_intersection_point(triangles[ids[j]], vertexes, ret, len, direction)) {
+                        std::cout << "intersection detected : elemnt" << i << "[" << j << "] length = " << len << (direction<=0?" positive":" negative") << std::endl;
+                        if(min_length != type_traits<real>::inf()) {
+                            ASSERT_TRUE(min_length <= len);//check
+                        }
+                        if(len < length) {
+                            std::cout << "new nearest point" << std::endl;
+                            point = ret;
+                            length = len;
+                        }
+                    }
+                }
+            }
+            ASSERT_TRUE(length != type_traits<real>::inf());
+        }
+    }
+#endif
 }
 
 #endif

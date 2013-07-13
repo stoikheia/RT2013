@@ -41,6 +41,10 @@ public:
     
     KdTree(const std::vector<AABB> &aabbs);
     
+    KdTree(const std::vector<AABB> &aabbs,
+           const std::vector<Triangle> &triangles,
+           const std::vector<Vertex> &vertexes);
+    
     void
     get_intersection_hierarchy_ids(const Ray &ray,
                                    std::vector<std::vector<size_t> > &ret) const;
@@ -53,6 +57,15 @@ public:
     get_ids_by_element_id(size_t elem_id) const {return elements_[elem_id].ids;};
     
 private:
+    void
+    build_kd_tree(size_t depth,
+                  size_t current_id,
+                  const AABB &current_aabb,
+                  const std::vector<AABB> &aabbs,
+                  const std::vector<Triangle> &triangles,
+                  const std::vector<Vertex> &vertexes,
+                  const std::vector<size_t> &ids);
+    
     void
     build_kd_tree(size_t depth,
                   size_t current_id,

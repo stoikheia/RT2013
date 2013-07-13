@@ -22,7 +22,7 @@
 
 
 const size_t kMIN_DEPTH = 6;
-const size_t kDEPTH_THREASHOLD = 50;
+const size_t kNUM_LEAF_EXPECTED_IDS = 5;
 const real kZERO_DIV_THRESHOLD = 0.5;
 
 inline size_t
@@ -33,7 +33,7 @@ get_max_depth(size_t size) {
         ii += i;
         ++depth;
     }
-    while((size / i) > kDEPTH_THREASHOLD) {
+    while((size / i) > kNUM_LEAF_EXPECTED_IDS) {
         i *= 2;
         ii += i;
         ++depth;
@@ -50,7 +50,7 @@ create_axis(const AABB &aabb) {
     z = aabb.max_corner.z() - aabb.min_corner.z();
     if(x > y && x > z) {
         return KdTree::axis_t::x;
-    } else if(y > x || y > z) {
+    } else if(y > z) {
         return KdTree::axis_t::y;
     } else {
         return KdTree::axis_t::z;
@@ -94,6 +94,139 @@ KdTree::KdTree(const std::vector<AABB> &aabbs) {
     build_kd_tree(get_max_depth(aabbs.size()), 0, whole_aabb_, aabbs, ids);
 };
 
+//aabb ids must be identical to triangle ids
+KdTree::KdTree(const std::vector<AABB> &aabbs,//triangles aabb
+               const std::vector<Triangle> &triangles,
+               const std::vector<Vertex> &vertexes) {
+    
+    //creating id array
+    _LOG(std::cout << "Kdtree - creating ids" << "\r");
+    std::vector<size_t> ids;
+    for(size_t i = 0; i < aabbs.size(); ++i) {
+        ids.push_back(i);
+    }
+    
+    //creating all contains aabb
+    _LOG(std::cout << "Kdtree - creating whole aabb" << "\r");
+    typename std::vector<AABB>::const_iterator it = aabbs.begin();
+    AABB whole_aabb(*it);
+    while(++it != aabbs.end()) {
+        whole_aabb.merge(*it);
+    }
+    whole_aabb_ = whole_aabb;
+    
+    elements_.push_back(Element());//root
+    elements_[0].axis = x;
+    elements_[0].min_side = whole_aabb_.min_corner[x];
+    elements_[0].max_side = whole_aabb_.max_corner[x];
+    build_kd_tree(get_max_depth(aabbs.size()), 0, whole_aabb_, aabbs, triangles, vertexes, ids);
+    
+}
+
+//balanced with locally zero area (with triangle check)
+void
+KdTree::build_kd_tree(size_t depth,
+                      size_t current_id,//element_id
+                      const AABB &current_aabb,
+                      const std::vector<AABB> &aabbs,//all aabbs
+                      const std::vector<Triangle> &triangles,//all triangles
+                      const std::vector<Vertex> &vertexes,//all vertexes
+                      const std::vector<size_t> &ids) {//aabb/triangle ids
+    
+    if(depth == 0 || ids.size() < 2) {
+        elements_[current_id].ids.assign(ids.begin(), ids.end());
+#if 1
+        std::cout << "leaf - depth : " << depth << " node id : " << current_id << " num : " << ids.size() << "------"<< std::endl;
+        std::cout << "aabb min : " << current_aabb.min_corner.x() << "," << current_aabb.min_corner.y() << "," << current_aabb.min_corner.z() << std::endl;
+        std::cout << "aabb max : " << current_aabb.max_corner.x() << "," << current_aabb.max_corner.y() << "," << current_aabb.max_corner.z() << std::endl;
+#endif
+        return;
+    }
+    
+    axis_t axis = create_axis(current_aabb);
+    
+    auto minmax_its = std::minmax_element(ids.begin(), ids.end(), [axis, &aabbs](size_t l, size_t r) -> bool {
+        return aabbs[l].min_corner[axis] < aabbs[r].min_corner[axis];
+    });
+    
+    real min_val, max_val;
+    min_val = std::max(aabbs[*minmax_its.first].min_corner[axis], current_aabb.min_corner[axis]);
+    max_val = std::min(aabbs[*minmax_its.second].max_corner[axis], current_aabb.max_corner[axis]);
+    
+    real div_point;
+    bool l_is_zero = false, r_is_zero = false;
+    
+    if((max_val - current_aabb.min_corner[axis]) / (current_aabb.max_corner[axis] - current_aabb.min_corner[axis]) <= kZERO_DIV_THRESHOLD) {
+        div_point = max_val;
+        r_is_zero = true;
+    } else if ((current_aabb.max_corner[axis] - min_val) / (current_aabb.max_corner[axis] - current_aabb.min_corner[axis]) <= kZERO_DIV_THRESHOLD) {
+        div_point = min_val;
+        l_is_zero = true;
+    } else {
+        std::vector<size_t> sorted_ids(ids);
+        std::sort(sorted_ids.begin(),
+                  sorted_ids.end(),
+                  [axis, &aabbs](size_t l, size_t r) -> bool {
+                      return aabbs[l].min_corner[axis] < aabbs[r].min_corner[axis];
+                  });
+        
+        div_point = get_div_point(sorted_ids, aabbs, axis);
+        
+        if((div_point <= current_aabb.min_corner[axis]) ||
+           (div_point >= current_aabb.max_corner[axis])) {
+            div_point = (current_aabb.min_corner[axis] + current_aabb.max_corner[axis]) / 2.0;
+        }
+    }
+    
+    
+    //divide aabb
+    AABB l_aabb(current_aabb), r_aabb(current_aabb);
+    l_aabb.max_corner[axis] = div_point;
+    r_aabb.min_corner[axis] = div_point;
+    
+    //next elements
+    size_t l_id, r_id;
+    l_id = elements_.size();
+    elements_.push_back(Element());
+    r_id = elements_.size();
+    elements_.push_back(Element());
+    
+    
+    elements_[current_id].l_id = l_id;
+    elements_[current_id].r_id = r_id;
+    
+    elements_[l_id].axis = axis;
+    elements_[l_id].min_side = current_aabb.min_corner[axis];
+    elements_[l_id].max_side = div_point;
+    
+    elements_[r_id].axis = axis;
+    elements_[r_id].min_side = div_point;
+    elements_[r_id].max_side = current_aabb.max_corner[axis];
+    
+    if(l_is_zero) {
+        build_kd_tree(depth, l_id, l_aabb, aabbs, std::vector<size_t>());
+        build_kd_tree(depth, r_id, r_aabb, aabbs, ids);
+    } else if(r_is_zero) {
+        build_kd_tree(depth, l_id, l_aabb, aabbs, ids);
+        build_kd_tree(depth, r_id, r_aabb, aabbs, std::vector<size_t>());
+    } else {
+        //divide ids
+        std::vector<size_t> l_ids, r_ids;
+        for (auto it = ids.begin(); it != ids.end(); ++it) {
+            if(aabbs[*it].min_corner[axis] <= div_point &&
+               l_aabb.does_intersect(triangles[*it], vertexes)) {
+                l_ids.push_back(*it);
+            }
+            if(aabbs[*it].max_corner[axis] >= div_point &&
+               r_aabb.does_intersect(triangles[*it], vertexes)) {
+                r_ids.push_back(*it);
+            }
+        }
+        
+        build_kd_tree(depth-1, l_id, l_aabb, aabbs, triangles, vertexes, l_ids);
+        build_kd_tree(depth-1, r_id, r_aabb, aabbs, triangles, vertexes, r_ids);
+    }
+}
 
 //balanced with locally zero area
 void
