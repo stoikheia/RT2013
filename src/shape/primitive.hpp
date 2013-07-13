@@ -340,7 +340,7 @@ struct Material {
     
     Vec4 diffuse;
     Vec4 specular;
-    Vec4 ambient;
+    Vec4 emissive;
     real reflection;
     real refractive;
     
@@ -353,7 +353,7 @@ struct Material {
     Material& operator=(Material &&) = default;
     
     Material(real val)
-    :diffuse(val),specular(val),ambient(val),
+    :diffuse(val),specular(val),emissive(val),
     reflection(val),refractive(val) {}
 };
 static_assert(std::is_pod<Material>::value, "Material is not POD.");
