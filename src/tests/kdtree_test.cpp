@@ -71,7 +71,7 @@ TEST_F(KDTreeTest, sphereTest1)
     
 }
 
-#if 1
+#if 0
 
 #include "obj_io.h"
 

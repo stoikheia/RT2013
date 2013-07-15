@@ -34,30 +34,30 @@ struct Ray {
     }
     
     //ray2plane
-    bool get_intersection_length(const Plane &plane, real &ret, real &direction) const {
-        direction = plane.n.dot(n);
+    bool get_intersection_length(const Plane &plane, real &ret, real &angle) const {
+        angle = plane.n.dot(n);
         real distance = o.dot(plane.n);
         
         if(plane.d == -distance) {
             ret = type_traits<real>::zero();
             return true;//both start and end is on the plane
         }
-        if(type_traits<real>::zero() == direction) {
+        if(type_traits<real>::zero() == angle) {
             return false;//orthogonal (and not on the plane)
         }
         
         //ret = (-distance - plane.d) / denominator;//memo : similar to formura
-        ret = -(distance + plane.d) / direction;
+        ret = -(distance + plane.d) / angle;
         return true;//intersection (positive or negative)
     }
     bool get_intersection_length(const Plane &plane, real &ret) const {
-        real direction;
-        return get_intersection_length(plane, ret, direction);
+        real angle;
+        return get_intersection_length(plane, ret, angle);
     }
     
-    bool get_intersection_point(const Plane &plane, Vec3 &ret, real &length, real &direction) const {
+    bool get_intersection_point(const Plane &plane, Vec3 &ret, real &length, real &angle) const {
         
-        if(!get_intersection_length(plane, length, direction)) {
+        if(!get_intersection_length(plane, length, angle)) {
             return false;//orthogonal and not on the plane
         }
         if(type_traits<real>::zero() <= length && length <= t) {
@@ -69,8 +69,8 @@ struct Ray {
         }
     }
     bool get_intersection_point(const Plane &plane, Vec3 &ret, real &length) const {
-        real direction;
-        return get_intersection_point(plane, ret, length, direction);
+        real angle;
+        return get_intersection_point(plane, ret, length, angle);
     }
     bool get_intersection_point(const Plane &plane, Vec3 &ret) const {
         real tt;
@@ -79,10 +79,10 @@ struct Ray {
     
     //ray2triangle
     template<typename Conteiner>
-    bool get_intersection_point(const Triangle &tri, const Conteiner &vertexes, Vec3 &ret, real &length, real &direction) const {
-        if(get_intersection_point(tri.create_plane(vertexes), ret, length, direction)) {
+    bool get_intersection_point(const Triangle &tri, const Conteiner &vertexes, Vec3 &ret, real &length, real &angle) const {
+        if(get_intersection_point(tri.create_plane(vertexes), ret, length, angle)) {
             Vec3 normal;
-            if(direction <= 0) {
+            if(angle <= 0) {
                 normal = self.n * -1.0;
             } else {
                 normal = self.n;
@@ -104,6 +104,34 @@ struct Ray {
     bool get_intersection_point(const Triangle &tri, const Conteiner &vertexes, Vec3 &ret) const {
         real tt;
         return get_intersection_point(tri, vertexes, ret, tt);
+    }
+    
+    //ray2sphere
+    bool get_intersection_point(const Sphere &sphere, std::vector<Vec3> &ret, std::vector<real> &length) const {
+        Vec3 op = o - sphere.p;
+        real op_dot_n = op.dot(n);
+        real op_len = op.length();
+        real d = op_dot_n * op_dot_n - (op_len * op_len - sphere.r * sphere.r);
+        if(0 <= d) {
+            real tt = -op_dot_n - std::sqrt(d);
+            if(0 <= tt) {
+                length.push_back(tt);
+                ret.push_back(o+n*tt);
+            }
+            tt = -op_dot_n + std::sqrt(d);
+            if(0 <= tt) {
+                length.push_back(tt);
+                ret.push_back(o+n*tt);
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+    template<typename Conteiner>
+    bool get_intersection_point(const Sphere &sphere, std::vector<Vec3> &ret) const {
+        std::vector<real> tt;
+        return get_intersection_point(sphere, ret, tt);
     }
 
     //clipping
@@ -153,7 +181,7 @@ struct Ray {
         Vec3 dir(e - s);
         real len = dir.length();
         return Ray(s,
-                   len!=type_traits<real>::zero()?(dir/len):s,
+                   len!=type_traits<real>::zero()?(dir/len):type_traits<real>::zero(),
                    len!=type_traits<real>::zero()?len:type_traits<real>::inf());
     }
 };

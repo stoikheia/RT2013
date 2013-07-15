@@ -123,7 +123,7 @@ KdTree::KdTree(const std::vector<AABB> &aabbs,//triangles aabb
     
 }
 
-//balanced with locally zero area (with triangle check)
+//balanced with locally zero area (with triangle intersection check)
 void
 KdTree::build_kd_tree(size_t depth,
                       size_t current_id,//element_id
@@ -416,7 +416,8 @@ create_plane(bool positive, KdTree::axis_t axis, const real &d) {
     return Plane(normals[axis] * (positive?1.0:-1.0), positive?-d:d);
 }
 
-
+//for get hit *leaf ids* recursively.
+//ids are sorted by distance from ray origin.
 void
 KdTree::get_intersection_leafs(const Ray &ray, size_t current_elem_id, std::vector<size_t> &ret) const {
     
@@ -454,11 +455,14 @@ KdTree::get_intersection_leafs(const Ray &ray, size_t current_elem_id, std::vect
     }
 }
 
+//for getting *leaf ids* which is sorted by distance from ray origin.
 void
 KdTree::get_intersection_leaf_ids(const Ray &ray, std::vector<size_t> &ret) const {
     get_intersection_leafs(ray, 0, ret);
 }
 
+//for getting *ids in leafs* which is sorted by distance from ray origin each elements.
+//removed duplicated ids.
 void
 KdTree::get_intersection_hierarchy_ids(const Ray &ray, std::vector<std::vector<size_t> > &ret) const {
     

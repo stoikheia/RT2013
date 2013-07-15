@@ -1,10 +1,11 @@
-//
-//  main.cpp
-//  RT2013
-//
-//  Created by Reiji Tokuda on 2013/06/12.
-//  Copyright (c) 2013年 3xv. All rights reserved.
-//
+/**
+ * 
+ * @file main_phong.cpp
+ * @author Reiji Tokuda.
+ *
+ * Implimentation of main_phong in RT2013 on 2013/07/16.
+ * 
+ */
 
 
 #include "shape/primitive.hpp"
@@ -16,7 +17,7 @@
 #include <fstream>
 
 
-struct Material {    
+struct Material {
     Vec4 diffuse;
     Vec4 specular;
     Vec4 emissive;
@@ -96,7 +97,7 @@ void create_cbox1(std::vector<Sphere> &spheres,
     spheres[1].m = 4;
     
     
-
+    
     const Vec3 p[8] = {
         Vec3(-10.0, -10.0, -10.0),//o
         Vec3(10.0, -10.0, -10.0),//right, bottom, front
@@ -154,7 +155,7 @@ void create_cbox1(std::vector<Sphere> &spheres,
     //floor
     triangles.push_back(Triangle(16,17,18));
     triangles.push_back(Triangle(16,18,19));
-
+    
 }
 
 DMat<4,4> create_mat44_x_rotate(real theta) {
@@ -186,8 +187,8 @@ DMat<4,4> create_mat44_z_rotate(real theta) {
 }
 DMat<4,4> create_mat44_xyz_rotate(real x, real y, real z) {
     return create_mat44_x_rotate(x) *
-            create_mat44_y_rotate(y) *
-            create_mat44_z_rotate(z);
+    create_mat44_y_rotate(y) *
+    create_mat44_z_rotate(z);
 }
 
 Vec3 mul_vec3_mat44(const Vec3 &v, const DMat<4, 4> &mat) {
@@ -195,7 +196,7 @@ Vec3 mul_vec3_mat44(const Vec3 &v, const DMat<4, 4> &mat) {
                 v.x()*mat.get(0,0)+v.y()*mat.get(1,0)+v.z()*mat.get(2,0)+1.0*mat.get(3,0),
                 v.x()*mat.get(0,1)+v.y()*mat.get(1,1)+v.z()*mat.get(2,1)+1.0*mat.get(3,1),
                 v.x()*mat.get(0,2)+v.y()*mat.get(1,2)+v.z()*mat.get(2,2)+1.0*mat.get(3,2)
-    );
+                );
 }
 
 
@@ -305,7 +306,7 @@ int main(int argc, const char * argv[])
                  materials);
     
     ScreenBuffer buff(640,480);
- 
+    
     Camera cam;
     cam.fov = 60.0 * M_PI/180.0;//to rad
     cam.aspect = (real)buff.w / (real)buff.h;
@@ -402,8 +403,8 @@ int main(int argc, const char * argv[])
                         }
                     }
                     for (auto it = spheres.begin(); !shadow_flag && it != spheres.end(); ++it) {                        if(it == last_hit_sphere_it) {
-                            continue;
-                        }
+                        continue;
+                    }
                         std::vector<Vec3> points;
                         std::vector<real> lengths;
                         if(p2l.get_intersection_point(*it, points, lengths)) {
@@ -425,4 +426,3 @@ int main(int argc, const char * argv[])
     
     return 0;
 }
-

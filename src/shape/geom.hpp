@@ -24,12 +24,14 @@
 struct Sphere {
     Vec3 p;
     real r;
-    Material m;
+    size_t m;//material id
     
     Sphere() = default;
     Sphere(const Vec3 &p_, real r_)
     :p(p_),r(r_),m() {}
     Sphere(const Sphere &s) = default;
+    Sphere& operator=(const Sphere &sphere) = default;
+    Sphere& operator=(Sphere &&sphere) = default;
 };
 
 struct Plane {

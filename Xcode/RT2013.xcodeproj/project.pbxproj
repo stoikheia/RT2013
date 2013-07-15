@@ -72,6 +72,7 @@
 		C330404E176C75B40055DBA8 /* geom_util.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = geom_util.cpp; sourceTree = "<group>"; };
 		C330404F176C75B40055DBA8 /* geom_util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = geom_util.h; sourceTree = "<group>"; };
 		C3304052176CD6DA0055DBA8 /* pair_util.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = pair_util.hpp; sourceTree = "<group>"; };
+		C37B408E17944F0A00407E88 /* main_phong.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main_phong.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -116,6 +117,7 @@
 			isa = PBXGroup;
 			children = (
 				C33040251767800A0055DBA8 /* main.cpp */,
+				C37B408E17944F0A00407E88 /* main_phong.cpp */,
 				C33040261767800A0055DBA8 /* shape */,
 				C33040281767800A0055DBA8 /* tests */,
 				C330403C1767FFCF0055DBA8 /* kdtree.h */,

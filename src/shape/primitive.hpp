@@ -50,8 +50,8 @@ template <> struct is_commutative_property_mul<float> : public std::true_type {}
 template <> struct is_commutative_property_mul<double> : public std::true_type {};
 
 
-/*  // < delived classes cannot aggregated-initialize and these cannot replace initializer-list.
-    // < std::array cannot be used because there is no initializer_list in VC.
+// < delived classes cannot aggregated-initialize and these cannot replace initializer-list.
+// < std::array cannot be used because there is no initializer_list in VC.
 template<size_t M, size_t N>
 struct DMat {//density matrix
         
@@ -63,7 +63,10 @@ struct DMat {//density matrix
     
     DMat() = default;
     DMat(const DMat &mat) = default;
+    DMat(DMat &&) = default;
     ~DMat() = default;
+    DMat& operator=(const DMat &) = default;
+    DMat& operator=(DMat &&) = default;
     
     DMat(real val)
     {std::fill(begin(), end(), val);}
@@ -89,22 +92,45 @@ struct DMat {//density matrix
     real& operator[](size_t ij) {assert(ij < M*N); return e[ij];}
     real operator[](size_t ij) const {assert(ij < M*N); return e[ij];}
     
-    DMat& operator=(const DMat &mat) = default;
     DMat& operator=(real val) {
         std::fill(begin(), end(), val);
         return self;
     }
+    
+    static DMat identity() {
+        assert(M == N);
+        DMat ret(0.0);
+        for(size_t i = 0; i < M; ++i) {
+            ret.get(i,i) = 1.0;
+        }
+        return ret;
+    }
+    
+    template<typename INDMat>
+    DMat<M,INDMat::n> operator*(const INDMat &mat) {
+        static_assert(N == INDMat::m, "Must be Num of Left Row == Num of Right Col");
+        DMat<M,INDMat::n> ret(0.0);
+        for(size_t l = 0; l < mat.n; ++l) {//ret-col r-col
+            for(size_t i = 0; i < M; ++i) {//l-row ret-row
+                for(size_t j = 0; j < N; ++j) {//l-col r-row
+                    ret.get(i,l) += self.get(i,j) * mat.get(j,l);
+                }
+            }
+        }
+        return ret;
+    }
+    DMat& operator*=(const DMat &mat) {
+        self = self * mat;
+        return self;
+    }
 };
-*/
 
-struct Vec2 {
+struct Vec2 : DMat<1,2> {
     
     typedef real* iterator;
     typedef const real* const_iterator;
     static const size_t N = 2;
-    
-    real e[N];
-    
+        
     //POD
     Vec2() = default;
     Vec2(const Vec2 &) = default;
@@ -148,14 +174,12 @@ struct Vec2 {
 static_assert(std::is_pod<Vec2>::value, "Vec2 is not POD.");
 
 
-struct Vec3 {
+struct Vec3 : DMat<1,3> {
     
     typedef real* iterator;
     typedef const real* const_iterator;
     static const size_t N = 3;
-    
-    real e[N];
-    
+        
     //POD
     Vec3() = default;
     Vec3(const Vec3 &) = default;
@@ -275,14 +299,12 @@ struct Vec3 {
 };
 static_assert(std::is_pod<Vec3>::value, "Vec3 is not POD.");
 
-struct Vec4 {
+struct Vec4 : DMat<1,4> {
     
     typedef real* iterator;
     typedef const real* const_iterator;
     static const size_t N = 4;
-    
-    real e[N];
-    
+        
     //POD
     Vec4() = default;
     Vec4(const Vec4 &) = default;
@@ -332,31 +354,50 @@ struct Vec4 {
     real g() const {return e[2];}
     real b() const {return e[3];}
     
+    //Plus Vec4
+    Vec4 &operator+=(const Vec4 &vec) {
+        self.x()+=vec.x(); self.y()+=vec.y(); self.z()+=vec.z(); self.w()+=vec.w();
+        return self;
+    }
+    Vec4 operator+(const Vec4 &vec) const {
+        return Vec4(self.x()+vec.x(), self.y()+vec.y(), self.z()+vec.z(), self.w()+vec.w());
+    }
+    //Plus real
+    Vec4 &operator+=(real val) {
+        self.x()+=val; self.y()+=val; self.z()+=val; self.w()+=val;
+        return self;
+    }
+    Vec4 operator+(real val) const {
+        return Vec4(self.x()+val, self.y()+val, self.z()+val, self.w()+val);
+    }
+    //Sub real
+    Vec4 &operator-=(real val) {
+        self.x()-=val; self.y()-=val; self.z()-=val; self.w()+=val;
+        return self;
+    }
+    Vec4 operator-(real val) const {
+        return Vec4(self.x()-val, self.y()-val, self.z()-val, self.w()-val);
+    }
+    //Mul real
+    Vec4 &operator*=(real &val) {
+        self.x()*=val; self.y()*=val; self.z()*=val; self.w()*=val;
+        return self;
+    }
+    Vec4 operator*(real val) const {
+        return Vec4(self.x()*val, self.y()*val, self.z()*val, self.w()*val);
+    }
+    //Div real
+    Vec4 &operator/=(real &val) {
+        self.x()/=val; self.y()/=val; self.z()/=val; self.w()/=val;
+        return self;
+    }
+    Vec4 operator/(real val) const {
+        return Vec4(self.x()/val, self.y()/val, self.z()/val, self.w()/val);
+    }
+    
 };
 static_assert(std::is_pod<Vec4>::value, "Vec4 is not POD.");
 
-struct Material {
-    
-    
-    Vec4 diffuse;
-    Vec4 specular;
-    Vec4 emissive;
-    real reflection;
-    real refractive;
-    
-    //POD
-    Material() = default;
-    Material(const Material &) = default;
-    Material(Material &&) = default;
-    ~Material() = default;
-    Material& operator=(const Material &) = default;
-    Material& operator=(Material &&) = default;
-    
-    Material(real val)
-    :diffuse(val),specular(val),emissive(val),
-    reflection(val),refractive(val) {}
-};
-static_assert(std::is_pod<Material>::value, "Material is not POD.");
 
 struct Vertex {
     
