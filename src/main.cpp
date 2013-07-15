@@ -92,7 +92,7 @@ void create_cbox1(std::vector<Sphere> &spheres,
     
     spheres.push_back(Sphere(Vec3(6.5, -7.0, 0.0), 3.0));
     spheres[0].m = 3;
-    spheres.push_back(Sphere(Vec3(-5.0, -6.0, 5.0), 4.0));
+    spheres.push_back(Sphere(Vec3(-5.0, 3.0, 5.0), 4.0));
     spheres[1].m = 4;
     
     
@@ -138,22 +138,112 @@ void create_cbox1(std::vector<Sphere> &spheres,
     vertexes.push_back(Vertex(p[4], n[0], t[0],2));
     vertexes.push_back(Vertex(p[5], n[0], t[0],2));
     vertexes.push_back(Vertex(p[1], n[0], t[0],2));
-    
+   
+    size_t i = 0;
     //left
-    triangles.push_back(Triangle(0,1,2));
-    triangles.push_back(Triangle(0,2,3));
+    triangles.push_back(Triangle(i,i+1,i+2));
+    triangles.push_back(Triangle(i,i+2,i+3));
+    i += 4;
     //right
-    triangles.push_back(Triangle(4,5,6));
-    triangles.push_back(Triangle(4,6,7));
+    triangles.push_back(Triangle(i,i+1,i+2));
+    triangles.push_back(Triangle(i,i+2,i+3));
+    i += 4;
     //back
-    triangles.push_back(Triangle(8,9,10));
-    triangles.push_back(Triangle(8,10,11));
+    triangles.push_back(Triangle(i,i+1,i+2));
+    triangles.push_back(Triangle(i,i+2,i+3));
+    i += 4;
     //ceil
-    triangles.push_back(Triangle(12,13,14));
-    triangles.push_back(Triangle(12,14,15));
+    triangles.push_back(Triangle(i,i+1,i+2));
+    triangles.push_back(Triangle(i,i+2,i+3));
+    i += 4;
     //floor
-    triangles.push_back(Triangle(16,17,18));
-    triangles.push_back(Triangle(16,18,19));
+    triangles.push_back(Triangle(i,i+1,i+2));
+    triangles.push_back(Triangle(i,i+2,i+3));
+    i += 4;
+    
+    
+    //box1
+    materials.push_back(Material());
+    materials[5].diffuse.a() = 1.0;
+    materials[5].diffuse.r() = 1.0;
+    materials[5].diffuse.g() = 1.0;
+    materials[5].diffuse.b() = 1.0;
+    materials[5].specular = 1.0;
+    materials[5].emissive = 0.0;
+    materials[5].reflection = 0.0;
+    materials[5].refractive = 0.0;
+    
+    const Vec3 p2[8] = {
+        Vec3(-7.0, -10.0, 3.0),//o
+        Vec3(-3.0, -10.0, 3.0),//right, bottom, front
+        Vec3(-7.0, -1.0, 3.0),//left, up, front
+        Vec3(-3.0, -1.0, 3.0),//right, up, front
+        Vec3(-7.0, -10.0, 7.0),//left, bottom, rear
+        Vec3(-3.0, -10.0, 7.0),//right, bottom, rear
+        Vec3(-7.0, -1.0, 7.0),//left, up, rear
+        Vec3(-3.0, -1.0, 7.0),//left, up, rear
+    };
+    const Vec3 n2[1] = {
+        Vec3(0.0, 0.0, 0.0),
+    };
+    const Vec2 t2[1] = {
+        Vec2(0.0, 0.0),
+    };
+    //left
+    vertexes.push_back(Vertex(p2[0], n2[0], t2[0],5));
+    vertexes.push_back(Vertex(p2[4], n2[0], t2[0],5));
+    vertexes.push_back(Vertex(p2[6], n2[0], t2[0],5));
+    vertexes.push_back(Vertex(p2[2], n2[0], t2[0],5));
+    //right
+    vertexes.push_back(Vertex(p2[1], n2[0], t2[0],5));
+    vertexes.push_back(Vertex(p2[3], n2[0], t2[0],5));
+    vertexes.push_back(Vertex(p2[7], n2[0], t2[0],5));
+    vertexes.push_back(Vertex(p2[5], n2[0], t2[0],5));
+    //front
+    vertexes.push_back(Vertex(p2[0], n2[0], t2[0],5));
+    vertexes.push_back(Vertex(p2[2], n2[0], t2[0],5));
+    vertexes.push_back(Vertex(p2[3], n2[0], t2[0],5));
+    vertexes.push_back(Vertex(p2[1], n2[0], t2[0],5));
+    //back
+    vertexes.push_back(Vertex(p2[4], n2[0], t2[0],5));
+    vertexes.push_back(Vertex(p2[5], n2[0], t2[0],5));
+    vertexes.push_back(Vertex(p2[7], n2[0], t2[0],5));
+    vertexes.push_back(Vertex(p2[6], n2[0], t2[0],5));
+    //ceil
+    vertexes.push_back(Vertex(p2[2], n2[0], t2[0],5));
+    vertexes.push_back(Vertex(p2[6], n2[0], t2[0],5));
+    vertexes.push_back(Vertex(p2[7], n2[0], t2[0],5));
+    vertexes.push_back(Vertex(p2[3], n2[0], t2[0],5));
+    //floor
+    vertexes.push_back(Vertex(p2[0], n2[0], t2[0],5));
+    vertexes.push_back(Vertex(p2[1], n2[0], t2[0],5));
+    vertexes.push_back(Vertex(p2[5], n2[0], t2[0],5));
+    vertexes.push_back(Vertex(p2[4], n2[0], t2[0],5));
+
+    //left
+    triangles.push_back(Triangle(i,i+1,i+2));
+    triangles.push_back(Triangle(i,i+2,i+3));
+    i += 4;
+    //right
+    triangles.push_back(Triangle(i,i+1,i+2));
+    triangles.push_back(Triangle(i,i+2,i+3));
+    i += 4;
+    //front
+    triangles.push_back(Triangle(i,i+1,i+2));
+    triangles.push_back(Triangle(i,i+2,i+3));
+    i += 4;
+    //back
+    triangles.push_back(Triangle(i,i+1,i+2));
+    triangles.push_back(Triangle(i,i+2,i+3));
+    i += 4;
+    //ceil
+    triangles.push_back(Triangle(i,i+1,i+2));
+    triangles.push_back(Triangle(i,i+2,i+3));
+    i += 4;
+    //floor
+    triangles.push_back(Triangle(i,i+1,i+2));
+    triangles.push_back(Triangle(i,i+2,i+3));
+    i += 4;
 
 }
 
@@ -353,7 +443,8 @@ int main(int argc, const char * argv[])
                             }
                             //specular
                             Vec3 ref_lignt = normal * 2.0 * p2l.n.dot(normal) - p2l.n;
-                            real specular_power = pow(std::min(0.0, ray.n.dot(ref_lignt)), 50);
+                            real norm_facotr = 1;//(50.0+2.0)/(2.0*M_PI);
+                            real specular_power = norm_facotr * pow(std::min(0.0, ray.n.dot(ref_lignt)), 50.0);
                             buff.color(j, i) += materials[vertexes[it->ids[0]].m].specular * specular_power;
                         }
                     }
@@ -383,7 +474,8 @@ int main(int argc, const char * argv[])
                             }
                             //specular
                             Vec3 ref_lignt = c2p.n * 2.0 * p2l.n.dot(c2p.n) - p2l.n;
-                            real specular_power = pow(std::min(0.0, ray.n.dot(ref_lignt)), 50);
+                            real norm_facotr = 1;//(50.0+2.0)/(2.0*M_PI);
+                            real specular_power = norm_facotr * pow(std::min(0.0, ray.n.dot(ref_lignt)), 50.0);
                             buff.color(j, i) += materials[it->m].specular * specular_power;
                         }
                     }
