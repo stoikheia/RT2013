@@ -21,29 +21,39 @@ public:
     virtual MatType mat_type() const {return MT_REFLECTION;}
 };
 
-struct RefrectionRadianceContext : public RadianceContext {
+struct ReflectionRadianceContext : public RadianceContext {
     
+    size_t step;
+    size_t depth;
     Vec4 radiance;
     const ReflectionMaterial *mat;
-    const Scene::IntersectionInformation &info;
+    std::unique_ptr<const Scene::IntersectionInformation> info;//owner
     
-    RefrectionRadianceContext(const Material *mat_,
-                              const Scene::IntersectionInformation &info_)
-    :radiance(0.0),info(info_) {
+    ReflectionRadianceContext(const Material *mat_,
+                              size_t depth_,
+                              std::unique_ptr<const Scene::IntersectionInformation> &&info_)
+    :step(0),depth(depth_),
+    radiance(0.0),info(std::move(info_)) {
         assert(mat_->mat_type() == Material::MT_REFLECTION);
         mat = (ReflectionMaterial*)mat_;
     }
     
     virtual bool step_start(Ray &next_ray) {
-        //TODO
-        return false;
+        if(step == 0 && depth < 10) {
+            next_ray.o = info->hitpoint;
+            next_ray.n = info->normal * 2.0 * (info->ray.n * -1.0).dot(info->normal) - (info->ray.n * -1.0);
+            next_ray.t = type_traits<real>::inf();
+            step++;
+            return true;
+        } else {
+            return false;
+        }
     }
-    virtual bool step_end(const Vec4 &radiance) {
-        //TODO
+    virtual bool step_end(const Vec4 &radiance_) {
+        radiance = radiance_;
         return false;
     }
     virtual Vec4 result() {
-        //TODO
         return radiance;
     }
 };

@@ -130,7 +130,7 @@ struct Ray {
                 length.push_back(tt);
                 ret.push_back(o+n*tt);
             }
-            return true;
+            return length.size() != 0;
         } else {
             return false;
         }

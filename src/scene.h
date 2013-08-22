@@ -44,7 +44,7 @@ struct Scene {
             Vec3 hitpoint, normal;
             real length, angle;
             if(ray.get_intersection_point(*it, vertexes, hitpoint, normal, length, angle)) {
-                if(length < info.length) {
+                if(length < info.length && 1.0e-10 < length) {
                     geom_it = it;
                     info.hitpoint = hitpoint;
                     info.normal = normal;
@@ -67,6 +67,7 @@ struct Scene {
             std::vector<Vec3> points;
             std::vector<real> lengths;
             if(ray.get_intersection_point(*it, points, lengths)) {
+                assert(lengths.size());
                 real length = lengths[0];
                 Vec3 hitpoint = points[0];
                 if(1 < lengths.size() && lengths[1] <= length) {
@@ -74,7 +75,7 @@ struct Scene {
                     length = lengths[1];
                     hitpoint = points[1];
                 }
-                if(length < info.length) {
+                if(length < info.length && 1.0e-10 < length) {
                     geom_it = it;
                     info.hitpoint = hitpoint;
                     info.length = length;

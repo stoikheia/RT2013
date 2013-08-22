@@ -61,7 +61,7 @@ void create_cbox1(Scene &scene) {
     std::vector<Vec3> &lights = scene.lights;
     
     lights.push_back(Vec3(0.0,9.9,0.0));
-    lights.push_back(Vec3(0.0,-9.9,0.0));
+    //lights.push_back(Vec3(0.0,-9.9,0.0));
     
     //left wall
     DiffuseMaterial *mat0 = new DiffuseMaterial();
@@ -91,14 +91,15 @@ void create_cbox1(Scene &scene) {
     mat2->specular = 0.5;
     mat2->emission = 0.0;
     //sphere1
-    DiffuseMaterial *mat3 = new DiffuseMaterial();
+    ReflectionMaterial *mat3 = new ReflectionMaterial();
+    //DiffuseMaterial *mat3 = new DiffuseMaterial();
     materials.push_back(mat3);
-    mat3->diffuse.a() = 1.0;
-    mat3->diffuse.r() = 0.0;
-    mat3->diffuse.g() = 0.5;
-    mat3->diffuse.b() = 0.5;
-    mat3->specular = 1.0;
-    mat3->emission = 0.0;
+//    mat3->diffuse.a() = 1.0;
+//    mat3->diffuse.r() = 0.0;
+//    mat3->diffuse.g() = 0.5;
+//    mat3->diffuse.b() = 0.5;
+//    mat3->specular = 1.0;
+//    mat3->emission = 0.0;
     //sphere2
     DiffuseMaterial *mat4 = new DiffuseMaterial();
     materials.push_back(mat4);
@@ -366,7 +367,7 @@ uint8_t convert_display_color(real val) {
     } else if(1.0 <= val){
         return 255;
     } else {
-        return pow(val, 1/2.2) * 255.0 + 0.5;
+        return val * 255.0;
     }
 }
 
@@ -412,8 +413,6 @@ void write_bitmap(const ScreenBuffer &buff, std::ofstream &ofs) {
             uint8_t r = convert_display_color(argb.r());
             uint8_t g = convert_display_color(argb.g());
             uint8_t b = convert_display_color(argb.b());
-            //uint8_t g = argb.g() < 1.0 ? argb.g()*255 : 255;
-            //uint8_t b = argb.b() < 1.0 ? argb.b()*255 : 255;
             ofs.write(reinterpret_cast<const char*>(&b),1);
             ofs.write(reinterpret_cast<const char*>(&g),1);
             ofs.write(reinterpret_cast<const char*>(&r),1);
@@ -441,6 +440,13 @@ void push_rad_ctx_stock(RadianceContextStock &stock,
             p = new DiffuseRadianceContext(scene.materials[mat_id],
                                            scene,
                                            std::move(info));
+            assert(p);
+            stock.push_back(p);
+            break;
+        case Material::MT_REFLECTION:
+            p = new ReflectionRadianceContext(scene.materials[mat_id],
+                                              stock.size(),
+                                              std::move(info));
             assert(p);
             stock.push_back(p);
             break;
@@ -472,6 +478,8 @@ Vec4 get_radiance(const Ray &ray, const Scene &scene, const Environment &env) {
             std::unique_ptr<Scene::IntersectionInformation> info(new Scene::IntersectionInformation());
             if(scene.get_intersecton(step_ray, *info)) {
                 push_rad_ctx_stock(rad_ctx_stock, scene, std::move(info));
+            } else {
+                rad_ctx_stock.back()->step_end(Vec4(0.0));
             }
             
         } else {
@@ -523,7 +531,6 @@ int main(int argc, const char * argv[])
         for(size_t j = 0; j < buff.h; ++j) {//vertical
             for(size_t i = 0; i < buff.w; ++i) {//horizontal
                 Ray ray = cam.get_ray(buff, i, j);
-                
                 buff.color(j,i) = get_radiance(ray, scene, env);
             }
         }
