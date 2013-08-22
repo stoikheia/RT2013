@@ -25,6 +25,16 @@
 		C330404D176C6C8F0055DBA8 /* intersection_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C330404C176C6C8E0055DBA8 /* intersection_test.cpp */; };
 		C3304050176C75B40055DBA8 /* geom_util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C330404E176C75B40055DBA8 /* geom_util.cpp */; };
 		C3304051176C75B40055DBA8 /* geom_util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C330404E176C75B40055DBA8 /* geom_util.cpp */; };
+		C3A8FF9417C5631A00416EA4 /* kdtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C330403B1767FFCF0055DBA8 /* kdtree.cpp */; };
+		C3A8FF9517C5631A00416EA4 /* scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C330403F176801A30055DBA8 /* scene.cpp */; };
+		C3A8FF9617C5631A00416EA4 /* intersection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3304049176C6C4A0055DBA8 /* intersection.cpp */; };
+		C3A8FF9717C5631A00416EA4 /* geom_util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C330404E176C75B40055DBA8 /* geom_util.cpp */; };
+		C3A8FF9817C5631A00416EA4 /* obj_io.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C305037817838A240071EA81 /* obj_io.cpp */; };
+		C3A8FF9F17C5633300416EA4 /* main_phong.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C37B408E17944F0A00407E88 /* main_phong.cpp */; };
+		C3A8FFA217C57E5000416EA4 /* radiance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3A8FFA017C57E4F00416EA4 /* radiance.cpp */; };
+		C3A8FFA517C60C8700416EA4 /* mat_diffuse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3A8FFA317C60C8600416EA4 /* mat_diffuse.cpp */; };
+		C3A8FFA817C60E4400416EA4 /* mat_reflection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3A8FFA617C60E4200416EA4 /* mat_reflection.cpp */; };
+		C3A8FFAB17C60F7200416EA4 /* mat_transparent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3A8FFA917C60F7000416EA4 /* mat_transparent.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -38,6 +48,15 @@
 			runOnlyForDeploymentPostprocessing = 1;
 		};
 		C330401717677C440055DBA8 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+		C3A8FF9A17C5631A00416EA4 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = /usr/share/man/man1/;
@@ -73,6 +92,16 @@
 		C330404F176C75B40055DBA8 /* geom_util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = geom_util.h; sourceTree = "<group>"; };
 		C3304052176CD6DA0055DBA8 /* pair_util.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = pair_util.hpp; sourceTree = "<group>"; };
 		C37B408E17944F0A00407E88 /* main_phong.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main_phong.cpp; sourceTree = "<group>"; };
+		C3A8FF9017C541E900416EA4 /* material.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = material.h; sourceTree = "<group>"; };
+		C3A8FF9E17C5631A00416EA4 /* RT2013 copy */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "RT2013 copy"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C3A8FFA017C57E4F00416EA4 /* radiance.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = radiance.cpp; sourceTree = "<group>"; };
+		C3A8FFA117C57E5000416EA4 /* radiance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = radiance.h; sourceTree = "<group>"; };
+		C3A8FFA317C60C8600416EA4 /* mat_diffuse.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mat_diffuse.cpp; sourceTree = "<group>"; };
+		C3A8FFA417C60C8700416EA4 /* mat_diffuse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mat_diffuse.h; sourceTree = "<group>"; };
+		C3A8FFA617C60E4200416EA4 /* mat_reflection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mat_reflection.cpp; sourceTree = "<group>"; };
+		C3A8FFA717C60E4300416EA4 /* mat_reflection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mat_reflection.h; sourceTree = "<group>"; };
+		C3A8FFA917C60F7000416EA4 /* mat_transparent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mat_transparent.cpp; sourceTree = "<group>"; };
+		C3A8FFAA17C60F7100416EA4 /* mat_transparent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mat_transparent.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,6 +118,13 @@
 			files = (
 				C3304039176798980055DBA8 /* libgtest_main.a in Frameworks */,
 				C330403A176798980055DBA8 /* libgtest.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C3A8FF9917C5631A00416EA4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -109,6 +145,7 @@
 			children = (
 				C3303FFD176777930055DBA8 /* RT2013 */,
 				C330401917677C440055DBA8 /* test_all */,
+				C3A8FF9E17C5631A00416EA4 /* RT2013 copy */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -127,6 +164,15 @@
 				C3304040176801A30055DBA8 /* scene.h */,
 				C330403F176801A30055DBA8 /* scene.cpp */,
 				C3304052176CD6DA0055DBA8 /* pair_util.hpp */,
+				C3A8FF9017C541E900416EA4 /* material.h */,
+				C3A8FFA117C57E5000416EA4 /* radiance.h */,
+				C3A8FFA017C57E4F00416EA4 /* radiance.cpp */,
+				C3A8FFA417C60C8700416EA4 /* mat_diffuse.h */,
+				C3A8FFA317C60C8600416EA4 /* mat_diffuse.cpp */,
+				C3A8FFA717C60E4300416EA4 /* mat_reflection.h */,
+				C3A8FFA617C60E4200416EA4 /* mat_reflection.cpp */,
+				C3A8FFAA17C60F7100416EA4 /* mat_transparent.h */,
+				C3A8FFA917C60F7000416EA4 /* mat_transparent.cpp */,
 			);
 			name = src;
 			path = ../src;
@@ -205,6 +251,23 @@
 			productReference = C330401917677C440055DBA8 /* test_all */;
 			productType = "com.apple.product-type.tool";
 		};
+		C3A8FF9117C5631A00416EA4 /* RT2013_phong */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C3A8FF9B17C5631A00416EA4 /* Build configuration list for PBXNativeTarget "RT2013_phong" */;
+			buildPhases = (
+				C3A8FF9217C5631A00416EA4 /* Sources */,
+				C3A8FF9917C5631A00416EA4 /* Frameworks */,
+				C3A8FF9A17C5631A00416EA4 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = RT2013_phong;
+			productName = RT2013;
+			productReference = C3A8FF9E17C5631A00416EA4 /* RT2013 copy */;
+			productType = "com.apple.product-type.tool";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -228,6 +291,7 @@
 			targets = (
 				C3303FFC176777930055DBA8 /* RT2013 */,
 				C330401817677C440055DBA8 /* test_all */,
+				C3A8FF9117C5631A00416EA4 /* RT2013_phong */,
 			);
 		};
 /* End PBXProject section */
@@ -243,6 +307,10 @@
 				C330404A176C6C4A0055DBA8 /* intersection.cpp in Sources */,
 				C3304050176C75B40055DBA8 /* geom_util.cpp in Sources */,
 				C305037A17838A240071EA81 /* obj_io.cpp in Sources */,
+				C3A8FFA217C57E5000416EA4 /* radiance.cpp in Sources */,
+				C3A8FFA517C60C8700416EA4 /* mat_diffuse.cpp in Sources */,
+				C3A8FFA817C60E4400416EA4 /* mat_reflection.cpp in Sources */,
+				C3A8FFAB17C60F7200416EA4 /* mat_transparent.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -260,6 +328,19 @@
 				C330404D176C6C8F0055DBA8 /* intersection_test.cpp in Sources */,
 				C3304051176C75B40055DBA8 /* geom_util.cpp in Sources */,
 				C305037B17838A240071EA81 /* obj_io.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C3A8FF9217C5631A00416EA4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C3A8FF9F17C5633300416EA4 /* main_phong.cpp in Sources */,
+				C3A8FF9417C5631A00416EA4 /* kdtree.cpp in Sources */,
+				C3A8FF9517C5631A00416EA4 /* scene.cpp in Sources */,
+				C3A8FF9617C5631A00416EA4 /* intersection.cpp in Sources */,
+				C3A8FF9717C5631A00416EA4 /* geom_util.cpp in Sources */,
+				C3A8FF9817C5631A00416EA4 /* obj_io.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -371,6 +452,24 @@
 			};
 			name = Release;
 		};
+		C3A8FF9C17C5631A00416EA4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ENABLE_OPENMP_SUPPORT = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				PRODUCT_NAME = "RT2013 copy";
+			};
+			name = Debug;
+		};
+		C3A8FF9D17C5631A00416EA4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ENABLE_OPENMP_SUPPORT = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				PRODUCT_NAME = "RT2013 copy";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -397,6 +496,15 @@
 			buildConfigurations = (
 				C330402017677C440055DBA8 /* Debug */,
 				C330402117677C440055DBA8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C3A8FF9B17C5631A00416EA4 /* Build configuration list for PBXNativeTarget "RT2013_phong" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C3A8FF9C17C5631A00416EA4 /* Debug */,
+				C3A8FF9D17C5631A00416EA4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

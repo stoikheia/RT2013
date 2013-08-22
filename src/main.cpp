@@ -2,7 +2,7 @@
 //  main.cpp
 //  RT2013
 //
-//  Created by Reiji Tokuda on 2013/06/12.
+//  Created by 3xv on 2013/06/12.
 //  Copyright (c) 2013年 3xv. All rights reserved.
 //
 
@@ -10,85 +10,104 @@
 #include "shape/primitive.hpp"
 #include "shape/geom.hpp"
 #include "shape/intersection.h"
+#include "material.h"
+#include "scene.h"
+#include "radiance.h"
+#include "mat_diffuse.h"
+#include "mat_reflection.h"
 
 #include <iostream>
 #include <vector>
 #include <fstream>
+#include <map>
+#include <random>
+#include <memory>
+
+//unko macro
+#define self (*this)
+
+real kAIR_REFRACTION = 1.000292;
+real kFREQUENCY_R = 700.0;//nm
+real kFREQUENCY_G = 546.1;//nm
+real kFREQUENCY_B = 435.8;//nm
+
+inline real K2C(real c) {//kelvin to celsius
+    return c - 273.15;
+}
+
+real create_refraction_air_edlen(real temp_c, real pressure_hpa, real humidity_1per) {
+    return 1.0+3.83639*10.0e-7*
+    0.75 * pressure_hpa * ( (1+0.75*pressure_hpa*(0.817-0.0133*temp_c)*10.0e-6)/(1+0.003661*temp_c) )
+    -5.607943*10.0e-10*humidity_1per*(4.07859739+0.44301857*temp_c + 0.00232093*temp_c*temp_c + 0.00045785*temp_c*temp_c*temp_c);
+}
+
+real create_refraction_air(real refraction, real temp, real pressure, real humidity_10per, real co2_100ppm) {
+    return refraction +
+    //(temp * -10.0 + pressure * 300.0 + humidity_10per * -100.0 + co2_100ppm * 1000.0)
+    (temp * -1.0 + pressure * 0.3 + humidity_10per * -0.1 + co2_100ppm * 0.01)
+    * 1.0e-6;
+}
 
 
-struct Material {    
-    Vec4 diffuse;
-    Vec4 specular;
-    Vec4 emissive;
-    real reflection;
-    real refractive;
+
+
+
+void create_cbox1(Scene &scene) {
     
-    //POD
-    Material() = default;
-    Material(const Material &) = default;
-    Material(Material &&) = default;
-    ~Material() = default;
-    Material& operator=(const Material &) = default;
-    Material& operator=(Material &&) = default;
+    std::vector<Sphere> &spheres = scene.spheres;
+    std::vector<Triangle> &triangles = scene.triangles;
+    std::vector<Vertex> &vertexes = scene.vertexes;
+    MaterialTable &materials = scene.materials;
+    std::vector<Vec3> &lights = scene.lights;
     
-    Material(real val)
-    :diffuse(val),specular(val),emissive(val),
-    reflection(val),refractive(val) {}
-};
-static_assert(std::is_pod<Material>::value, "Material is not POD.");
-
-
-void create_cbox1(std::vector<Sphere> &spheres,
-                  std::vector<Triangle> &triangles,
-                  std::vector<Vertex> &vertexes,
-                  std::vector<Material> &materials) {
+    lights.push_back(Vec3(0.0,9.9,0.0));
+    lights.push_back(Vec3(0.0,-9.9,0.0));
     
-    materials.resize(5);
     //left wall
-    materials[0].diffuse.a() = 1.0;
-    materials[0].diffuse.r() = 1.0;
-    materials[0].diffuse.g() = 0.0;
-    materials[0].diffuse.b() = 0.0;
-    materials[0].specular = 0.5;
-    materials[0].emissive = 0.0;
-    materials[0].reflection = 0.0;
-    materials[0].refractive = 0.0;
+    DiffuseMaterial *mat0 = new DiffuseMaterial();
+    materials.push_back(mat0);
+    mat0->diffuse.a() = 1.0;
+    mat0->diffuse.r() = 1.0;
+    mat0->diffuse.g() = 0.0;
+    mat0->diffuse.b() = 0.0;
+    mat0->specular = 0.5;
+    mat0->emission = 0.0;
     //right wall
-    materials[1].diffuse.a() = 1.0;
-    materials[1].diffuse.r() = 0.0;
-    materials[1].diffuse.g() = 1.0;
-    materials[1].diffuse.b() = 0.0;
-    materials[1].specular = 0.5;
-    materials[1].emissive = 0.0;
-    materials[1].reflection = 0.0;
-    materials[1].refractive = 0.0;
+    DiffuseMaterial *mat1 = new DiffuseMaterial();
+    materials.push_back(mat1);
+    mat1->diffuse.a() = 1.0;
+    mat1->diffuse.r() = 0.0;
+    mat1->diffuse.g() = 1.0;
+    mat1->diffuse.b() = 0.0;
+    mat1->specular = 0.5;
+    mat1->emission = 0.0;
     //back,ceil,floor wall
-    materials[2].diffuse.a() = 1.0;
-    materials[2].diffuse.r() = 0.5;
-    materials[2].diffuse.g() = 0.5;
-    materials[2].diffuse.b() = 0.5;
-    materials[2].specular = 0.5;
-    materials[2].emissive = 0.0;
-    materials[2].reflection = 0.0;
-    materials[2].refractive = 0.0;
+    DiffuseMaterial *mat2 = new DiffuseMaterial();
+    materials.push_back(mat2);
+    mat2->diffuse.a() = 1.0;
+    mat2->diffuse.r() = 0.5;
+    mat2->diffuse.g() = 0.5;
+    mat2->diffuse.b() = 0.5;
+    mat2->specular = 0.5;
+    mat2->emission = 0.0;
     //sphere1
-    materials[3].diffuse.a() = 1.0;
-    materials[3].diffuse.r() = 0.0;
-    materials[3].diffuse.g() = 0.5;
-    materials[3].diffuse.b() = 0.5;
-    materials[3].specular = 1.0;
-    materials[3].emissive = 0.0;
-    materials[3].reflection = 0.0;
-    materials[3].refractive = 0.0;
+    DiffuseMaterial *mat3 = new DiffuseMaterial();
+    materials.push_back(mat3);
+    mat3->diffuse.a() = 1.0;
+    mat3->diffuse.r() = 0.0;
+    mat3->diffuse.g() = 0.5;
+    mat3->diffuse.b() = 0.5;
+    mat3->specular = 1.0;
+    mat3->emission = 0.0;
     //sphere2
-    materials[4].diffuse.a() = 1.0;
-    materials[4].diffuse.r() = 0.5;
-    materials[4].diffuse.g() = 0.0;
-    materials[4].diffuse.b() = 0.5;
-    materials[4].specular = 1.0;
-    materials[4].emissive = 0.0;
-    materials[4].reflection = 0.0;
-    materials[4].refractive = 0.0;
+    DiffuseMaterial *mat4 = new DiffuseMaterial();
+    materials.push_back(mat4);
+    mat4->diffuse.a() = 1.0;
+    mat4->diffuse.r() = 0.5;
+    mat4->diffuse.g() = 0.0;
+    mat4->diffuse.b() = 0.5;
+    mat4->specular = 1.0;
+    mat4->emission = 0.0;
     
     spheres.push_back(Sphere(Vec3(6.5, -7.0, 0.0), 3.0));
     spheres[0].m = 3;
@@ -163,15 +182,14 @@ void create_cbox1(std::vector<Sphere> &spheres,
     
     
     //box1
-    materials.push_back(Material());
-    materials[5].diffuse.a() = 1.0;
-    materials[5].diffuse.r() = 1.0;
-    materials[5].diffuse.g() = 1.0;
-    materials[5].diffuse.b() = 1.0;
-    materials[5].specular = 1.0;
-    materials[5].emissive = 0.0;
-    materials[5].reflection = 0.0;
-    materials[5].refractive = 0.0;
+    DiffuseMaterial *mat5 = new DiffuseMaterial();
+    materials.push_back(mat5);
+    mat5->diffuse.a() = 1.0;
+    mat5->diffuse.r() = 1.0;
+    mat5->diffuse.g() = 1.0;
+    mat5->diffuse.b() = 1.0;
+    mat5->specular = 1.0;
+    mat5->emission = 0.0;
     
     const Vec3 p2[8] = {
         Vec3(-7.0, -10.0, 3.0),//o
@@ -247,7 +265,11 @@ void create_cbox1(std::vector<Sphere> &spheres,
 
 }
 
-DMat<4,4> create_mat44_x_rotate(real theta) {
+inline real to_rad(real degree) {
+    return degree * M_PI / 180.0;
+}
+
+DMat<4,4> create_mat44_x_axix_rotation(real theta) {
     DMat<4, 4> mat(0.0);
     mat.get(0,0) = 1.0;
     mat.get(1,1) = std::cos(theta);
@@ -256,7 +278,7 @@ DMat<4,4> create_mat44_x_rotate(real theta) {
     mat.get(2,2) = std::cos(theta);
     return mat;
 }
-DMat<4,4> create_mat44_y_rotate(real theta) {
+DMat<4,4> create_mat44_y_axix_rotation(real theta) {
     DMat<4, 4> mat(0.0);
     mat.get(0,0) = std::cos(theta);
     mat.get(0,2) = std::sin(theta);
@@ -265,7 +287,7 @@ DMat<4,4> create_mat44_y_rotate(real theta) {
     mat.get(2,2) = std::cos(theta);
     return mat;
 }
-DMat<4,4> create_mat44_z_rotate(real theta) {
+DMat<4,4> create_mat44_z_axix_rotation(real theta) {
     DMat<4, 4> mat(0.0);
     mat.get(0,0) = std::cos(theta);
     mat.get(0,1) = -std::sin(theta);
@@ -274,13 +296,13 @@ DMat<4,4> create_mat44_z_rotate(real theta) {
     mat.get(2,2) = 1.0;
     return mat;
 }
-DMat<4,4> create_mat44_xyz_rotate(real x, real y, real z) {
-    return create_mat44_x_rotate(x) *
-            create_mat44_y_rotate(y) *
-            create_mat44_z_rotate(z);
+DMat<4,4> create_mat44_zxy_rotation(real x, real y, real z) {
+    return create_mat44_z_axix_rotation(z) *
+            create_mat44_x_axix_rotation(x) *
+            create_mat44_y_axix_rotation(y);
 }
 
-Vec3 mul_vec3_mat44(const Vec3 &v, const DMat<4, 4> &mat) {
+Vec3 operator*(const Vec3 &v, const DMat<4, 4> &mat) {
     return Vec3(
                 v.x()*mat.get(0,0)+v.y()*mat.get(1,0)+v.z()*mat.get(2,0)+1.0*mat.get(3,0),
                 v.x()*mat.get(0,1)+v.y()*mat.get(1,1)+v.z()*mat.get(2,1)+1.0*mat.get(3,1),
@@ -313,15 +335,42 @@ struct Camera {
     real aspect;
     Vec3 pos;
     DMat<4,4> mat;
+    
+private:
+    real v_fov;
+    real plane_width;
+    real plane_height;
+    real plane_origin_h;
+    real plane_origin_v;
+public:
+    
+    void setup() {
+        v_fov = fov / aspect;
+        plane_width = 2.0 * (sin(fov/2.0)/cos(fov/2.0));
+        plane_height = 2.0 * (sin(v_fov/2.0)/cos(v_fov/2.0));
+        plane_origin_h = -plane_width/2.0;
+        plane_origin_v = plane_height/2.0;
+    }
+    
+    Ray get_ray(const ScreenBuffer &buff, size_t i, size_t j) {
+        real x = plane_origin_h + i * plane_width / buff.w;
+        real y = plane_origin_v - j * plane_height / buff.h;
+        Vec3 dir = (Vec3(x,y,1.0) * mat).to_normal();
+        return Ray(pos, dir);
+    }
 };
 
-
-void write_bitmap(const ScreenBuffer &buff) {
-    std::ofstream ofs("./result.bmp", std::ios::binary | std::ios::trunc);
-    if(!ofs) {
-        assert(0);
-        return;
+uint8_t convert_display_color(real val) {
+    if(0.0 > val) {
+        return 0.0;
+    } else if(1.0 <= val){
+        return 255;
+    } else {
+        return pow(val, 1/2.2) * 255.0 + 0.5;
     }
+}
+
+void write_bitmap(const ScreenBuffer &buff, std::ofstream &ofs) {
     
     const uint32_t file_header_size = 14;
     const uint32_t info_header_size = 40;
@@ -360,15 +409,82 @@ void write_bitmap(const ScreenBuffer &buff) {
     for(size_t j = buff.h; j > 0; --j) {//vertical
         for(size_t i = 0; i < buff.w; ++i) {//horizontal
             const Vec4 &argb = buff.const_color(j-1,i);
-            uint8_t r = argb.r() < 1.0 ? argb.r()*255 : 255;
-            uint8_t g = argb.g() < 1.0 ? argb.g()*255 : 255;
-            uint8_t b = argb.b() < 1.0 ? argb.b()*255 : 255;
+            uint8_t r = convert_display_color(argb.r());
+            uint8_t g = convert_display_color(argb.g());
+            uint8_t b = convert_display_color(argb.b());
+            //uint8_t g = argb.g() < 1.0 ? argb.g()*255 : 255;
+            //uint8_t b = argb.b() < 1.0 ? argb.b()*255 : 255;
             ofs.write(reinterpret_cast<const char*>(&b),1);
             ofs.write(reinterpret_cast<const char*>(&g),1);
             ofs.write(reinterpret_cast<const char*>(&r),1);
         }
     }
 }
+
+
+struct Environment {
+    
+};
+
+void push_rad_ctx_stock(RadianceContextStock &stock,
+                          const Scene &scene,
+                          std::unique_ptr<const Scene::IntersectionInformation> &&info) {
+    size_t mat_id;
+    if(info->is_triangle) {
+        mat_id = scene.vertexes[scene.triangles[info->geom_id].ids[0]].m;
+    } else {
+        mat_id = scene.spheres[info->geom_id].m;
+    }
+    RadianceContext *p;
+    switch (scene.materials[mat_id]->mat_type()) {
+        case Material::MT_DIFFUSE:
+            p = new DiffuseRadianceContext(scene.materials[mat_id],
+                                           scene,
+                                           std::move(info));
+            assert(p);
+            stock.push_back(p);
+            break;
+            
+        default:
+            assert(0);
+            break;
+    }
+    
+}
+
+Vec4 get_radiance(const Ray &ray, const Scene &scene, const Environment &env) {
+    
+    std::mt19937 engin;
+    std::uniform_real_distribution<real> dist(0.0, 1.0);
+    
+    RadianceContextStock rad_ctx_stock;
+    
+    std::unique_ptr<Scene::IntersectionInformation> first_info(new Scene::IntersectionInformation());
+    if(scene.get_intersecton(ray, *first_info)) {
+        push_rad_ctx_stock(rad_ctx_stock, scene, std::move(first_info));
+    }
+    
+    Vec4 last_radiance(0.0);
+    while (rad_ctx_stock.size()) {
+        Ray step_ray;
+        if(rad_ctx_stock.back()->step_start(step_ray)) {
+            
+            std::unique_ptr<Scene::IntersectionInformation> info(new Scene::IntersectionInformation());
+            if(scene.get_intersecton(step_ray, *info)) {
+                push_rad_ctx_stock(rad_ctx_stock, scene, std::move(info));
+            }
+            
+        } else {
+            rad_ctx_stock.back()->step_end(last_radiance);
+            last_radiance = rad_ctx_stock.back()->result();
+            rad_ctx_stock.pop_back_with_delete();
+        }
+        
+    }
+
+    return last_radiance;
+}
+
 
 struct TimeCount {
     std::chrono::high_resolution_clock::time_point time_point;
@@ -384,15 +500,9 @@ struct TimeCount {
 int main(int argc, const char * argv[])
 {
     
-    std::vector<Sphere> spheres;
-    std::vector<Triangle> triangles;
-    std::vector<Vertex> vertexes;
-    std::vector<Material> materials;
+    Scene scene;
     
-    create_cbox1(spheres,
-                 triangles,
-                 vertexes,
-                 materials);
+    create_cbox1(scene);
     
     ScreenBuffer buff(640,480);
  
@@ -402,119 +512,138 @@ int main(int argc, const char * argv[])
     cam.pos = Vec3(0.0, 0.0, -10.0 + std::cos(cam.fov/2.0) * (-10.0/std::sin(cam.fov/2.0)));
     cam.mat = DMat<4,4>::identity();
     
-    Vec3 LIGHT(0.0,9.9,0.0);
-    
+    Environment env;
+    //env.refractive_index = kAIR_REFRACTION;
     
     {
-        TimeCount tc("ray tracing time");
+        TimeCount tc("ray tracing");
         
-        real v_fov = cam.fov / cam.aspect;
-        real plane_width = 2.0 * (sin(cam.fov/2.0)/cos(cam.fov/2.0));
-        real plane_height = 2.0 * (sin(v_fov/2.0)/cos(v_fov/2.0));
-        real plane_origin_h = -plane_width/2.0;
-        real plane_origin_v = plane_height/2.0;
+        cam.setup();
+
         for(size_t j = 0; j < buff.h; ++j) {//vertical
             for(size_t i = 0; i < buff.w; ++i) {//horizontal
-                real x = plane_origin_h + i * plane_width / buff.w;
-                real y = plane_origin_v - j * plane_height / buff.h;
-                Vec3 dir = mul_vec3_mat44(Vec3(x,y,1.0), cam.mat).to_normal();
-                Ray ray(cam.pos, dir);
+                Ray ray = cam.get_ray(buff, i, j);
                 
-                Ray p2l;
-                std::vector<Triangle>::iterator last_hit_triangle_it = triangles.end();
-                std::vector<Sphere>::iterator last_hit_sphere_it = spheres.end();
-                real min_distance = std::numeric_limits<real>::max();
-                for (auto it = triangles.begin(); it != triangles.end(); ++it) {
-                    Vec3 point;
-                    real length, angle;
-                    if(ray.get_intersection_point(*it, vertexes, point, length, angle)) {
-                        //real distance = (point - cam.pos).length();
-                        if(length < min_distance) {
-                            min_distance = length;
-                            p2l = Ray::create_start_end(point, LIGHT);
-                            last_hit_triangle_it = it;
-                            Vec3 normal = it->create_plane(vertexes).n;
-                            //diffuse
-                            real diffuse_angle = p2l.n.dot(normal);
-                            if(0 <= diffuse_angle) {
-                                buff.color(j, i) = materials[vertexes[it->ids[0]].m].diffuse * diffuse_angle;
-                            } else {
-                                buff.color(j, i) = 0.0;
-                            }
-                            //specular
-                            Vec3 ref_lignt = normal * 2.0 * p2l.n.dot(normal) - p2l.n;
-                            real norm_facotr = 1;//(50.0+2.0)/(2.0*M_PI);
-                            real specular_power = norm_facotr * pow(std::min(0.0, ray.n.dot(ref_lignt)), 50.0);
-                            buff.color(j, i) += materials[vertexes[it->ids[0]].m].specular * specular_power;
-                        }
-                    }
-                }
-                for (auto it = spheres.begin(); it != spheres.end(); ++it) {
-                    std::vector<Vec3> points;
-                    std::vector<real> lengths;
-                    if(ray.get_intersection_point(*it, points, lengths)) {
-                        real distance = lengths[0];
-                        Vec3 point = points[0];
-                        if(1 < lengths.size() && lengths[1] <= distance) {
-                            assert(0 <= lengths[1]);
-                            distance = lengths[1];
-                            point = points[1];
-                        }
-                        if(distance < min_distance) {
-                            min_distance = distance;
-                            p2l = Ray::create_start_end(point, LIGHT);
-                            last_hit_sphere_it = it;
-                            Ray c2p = Ray::create_start_end(it->p, point);
-                            //diffuse
-                            real diffuse_angle = p2l.n.dot(c2p.n);
-                            if(0 <= diffuse_angle) {
-                                buff.color(j, i) = materials[it->m].diffuse * diffuse_angle;
-                            } else {
-                                buff.color(j, i) = 0.0;
-                            }
-                            //specular
-                            Vec3 ref_lignt = c2p.n * 2.0 * p2l.n.dot(c2p.n) - p2l.n;
-                            real norm_facotr = 1;//(50.0+2.0)/(2.0*M_PI);
-                            real specular_power = norm_facotr * pow(std::min(0.0, ray.n.dot(ref_lignt)), 50.0);
-                            buff.color(j, i) += materials[it->m].specular * specular_power;
-                        }
-                    }
-                }
-                //shadow
-                if(last_hit_triangle_it != triangles.end() || last_hit_sphere_it != spheres.end()) {
-                    bool shadow_flag = false;
-                    for (auto it = triangles.begin(); !shadow_flag && it != triangles.end(); ++it) {
-                        if(it == last_hit_triangle_it) {
-                            continue;
-                        }
-                        Vec3 point;
-                        if(p2l.get_intersection_point(*it, vertexes, point)) {
-                            buff.color(j, i) = buff.color(j, i) * 0.5;
-                            shadow_flag = true;
-                        }
-                    }
-                    for (auto it = spheres.begin(); !shadow_flag && it != spheres.end(); ++it) {                        if(it == last_hit_sphere_it) {
-                            continue;
-                        }
-                        std::vector<Vec3> points;
-                        std::vector<real> lengths;
-                        if(p2l.get_intersection_point(*it, points, lengths)) {
-                            buff.color(j, i) = buff.color(j, i) * 0.5;
-                            shadow_flag = true;
-                        }
-                    }
-                }
+                buff.color(j,i) = get_radiance(ray, scene, env);
             }
         }
         tc.display_now();
     }
     
     {
-        TimeCount tc("saving time");
-        write_bitmap(buff);
+        TimeCount tc("saving");
+        std::ofstream ofs("./result.bmp", std::ios::binary | std::ios::trunc);
+        if(!ofs) {
+            assert(0);
+        }
+        write_bitmap(buff, ofs);
         tc.display_now();
     }
     
     return 0;
 }
+
+/* ----------------- */
+/*
+Vec4 get_radiance__old(const Ray &ray, const Scene &scene, const Environment &env ,const Vec3 &light) {
+    
+    Ray p2l;
+    Vec4 radiance(0.0);
+    std::vector<Triangle>::const_iterator last_hit_triangle_it = scene.triangles.end();
+    std::vector<Sphere>::const_iterator last_hit_sphere_it = scene.spheres.end();
+    real min_distance = std::numeric_limits<real>::max();
+    for (auto it = scene.triangles.begin(); it != scene.triangles.end(); ++it) {
+        Vec3 point;
+        real length, angle;
+        if(ray.get_intersection_point(*it, scene.vertexes, point, length, angle)) {
+            //real distance = (point - cam.pos).length();
+            if(length < min_distance) {
+                min_distance = length;
+                p2l = Ray::create_start_end(point, light);
+                last_hit_triangle_it = it;
+                Vec3 normal = it->create_plane(scene.vertexes).n;
+                //diffuse
+                real diffuse_angle = p2l.n.dot(normal);
+                if(0 <= diffuse_angle) {
+                    radiance = scene.materials[scene.vertexes[it->ids[0]].m].diffuse * diffuse_angle;
+                }
+                //specular
+                Vec3 ref_lignt = normal * 2.0 * p2l.n.dot(normal) - p2l.n;
+                real norm_facotr = 1;//(50.0+2.0)/(2.0*M_PI);
+                real specular_power = norm_facotr * pow(std::min(0.0, ray.n.dot(ref_lignt)), 50.0);
+                radiance += scene.materials[scene.vertexes[it->ids[0]].m].specular * specular_power;
+            }
+        }
+    }
+    for (auto it = scene.spheres.begin(); it != scene.spheres.end(); ++it) {
+        std::vector<Vec3> points;
+        std::vector<real> lengths;
+        if(ray.get_intersection_point(*it, points, lengths)) {
+            real distance = lengths[0];
+            Vec3 point = points[0];
+            if(1 < lengths.size() && lengths[1] <= distance) {
+                assert(0 <= lengths[1]);
+                distance = lengths[1];
+                point = points[1];
+            }
+            if(distance < min_distance) {
+                min_distance = distance;
+                p2l = Ray::create_start_end(point, light);
+                last_hit_sphere_it = it;
+                Ray c2p = Ray::create_start_end(it->p, point);
+                //diffuse
+                real diffuse_angle = p2l.n.dot(c2p.n);
+                if(0 <= diffuse_angle) {
+                    radiance = scene.materials[it->m].diffuse * diffuse_angle;
+                } else {
+                    radiance = 0.0;
+                }
+                //specular
+                Vec3 ref_lignt = c2p.n * 2.0 * p2l.n.dot(c2p.n) - p2l.n;
+                real norm_facotr = 1;//(50.0+2.0)/(2.0*M_PI);
+                real specular_power = norm_facotr * pow(std::min(0.0, ray.n.dot(ref_lignt)), 50.0);
+                radiance += scene.materials[it->m].specular * specular_power;
+            }
+        }
+    }
+    //shadow
+    if(last_hit_triangle_it != scene.triangles.end() || last_hit_sphere_it != scene.spheres.end()) {
+        bool shadow_flag = false;
+        for (auto it = scene.triangles.begin(); !shadow_flag && it != scene.triangles.end(); ++it) {
+            if(it == last_hit_triangle_it) {
+                continue;
+            }
+            Vec3 point;
+            if(p2l.get_intersection_point(*it, scene.vertexes, point)) {
+                radiance = radiance * 0.5;
+                shadow_flag = true;
+            }
+        }
+        for (auto it = scene.spheres.begin(); !shadow_flag && it != scene.spheres.end(); ++it) {
+            if(it == last_hit_sphere_it) {
+                continue;
+            }
+            std::vector<Vec3> points;
+            std::vector<real> lengths;
+            if(p2l.get_intersection_point(*it, points, lengths)) {
+                radiance = radiance * 0.5;
+                shadow_flag = true;
+            }
+        }
+    }
+    return radiance;
+ }*/
+
+//    const DiffuseMaterial* get_diffuse_material(size_t i) const {
+//        assert(self[i]->mat_type() == Material::MT_DIFFUSE);
+//        return reinterpret_cast<DiffuseMaterial*>(self.at(i));
+//    }
+//    const ReflectionMaterial* get_reflection_material(size_t i) const {
+//        assert(self[i]->mat_type() == Material::MT_REFLECTION);
+//        return reinterpret_cast<ReflectionMaterial*>(self.at(i));
+//    }
+//    const TransparentMaterial* get_transparent_material(size_t i) const {
+//        assert(self[i]->mat_type() == Material::MT_TRANSPARENT);
+//        return reinterpret_cast<TransparentMaterial*>(self.at(i));
+//    }
 

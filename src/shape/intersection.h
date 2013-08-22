@@ -79,9 +79,11 @@ struct Ray {
     
     //ray2triangle
     template<typename Conteiner>
-    bool get_intersection_point(const Triangle &tri, const Conteiner &vertexes, Vec3 &ret, real &length, real &angle) const {
-        if(get_intersection_point(tri.create_plane(vertexes), ret, length, angle)) {
-            Vec3 normal;
+    bool get_intersection_point(const Triangle &tri, const Conteiner &vertexes, Vec3 &ret, Vec3 &n, real &length, real &angle) const {
+        Plane plane = tri.create_plane(vertexes);
+        if(get_intersection_point(plane, ret, length, angle)) {
+            n = plane.n;
+            Vec3 normal;//for ccw
             if(angle <= 0) {
                 normal = self.n * -1.0;
             } else {
@@ -96,14 +98,19 @@ struct Ray {
         return false;
     }
     template<typename Conteiner>
-    bool get_intersection_point(const Triangle &tri, const Conteiner &vertexes, Vec3 &ret, real &length) const {
+    bool get_intersection_point(const Triangle &tri, const Conteiner &vertexes, Vec3 &ret, Vec3 &n, real &length) const {
         real direction;
-        return get_intersection_point(tri, vertexes, ret, length, direction);
+        return get_intersection_point(tri, vertexes, ret, n, length, direction);
+    }
+    template<typename Conteiner>
+    bool get_intersection_point(const Triangle &tri, const Conteiner &vertexes, Vec3 &ret, Vec3 &n) const {
+        real tt;
+        return get_intersection_point(tri, vertexes, ret, n, tt);
     }
     template<typename Conteiner>
     bool get_intersection_point(const Triangle &tri, const Conteiner &vertexes, Vec3 &ret) const {
-        real tt;
-        return get_intersection_point(tri, vertexes, ret, tt);
+        Vec3 n;
+        return get_intersection_point(tri, vertexes, ret, n);
     }
     
     //ray2sphere

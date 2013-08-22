@@ -425,24 +425,23 @@ int main(int argc, const char * argv[])
                 std::vector<Sphere>::iterator last_hit_sphere_it = spheres.end();
                 real min_distance = std::numeric_limits<real>::max();
                 for (auto it = triangles.begin(); it != triangles.end(); ++it) {
-                    Vec3 point;
+                    Vec3 point, n;
                     real length, angle;
-                    if(ray.get_intersection_point(*it, vertexes, point, length, angle)) {
+                    if(ray.get_intersection_point(*it, vertexes, point, n, length, angle)) {
                         //real distance = (point - cam.pos).length();
                         if(length < min_distance) {
                             min_distance = length;
                             p2l = Ray::create_start_end(point, LIGHT);
                             last_hit_triangle_it = it;
-                            Vec3 normal = it->create_plane(vertexes).n;
                             //diffuse
-                            real diffuse_angle = p2l.n.dot(normal);
+                            real diffuse_angle = p2l.n.dot(n);
                             if(0 <= diffuse_angle) {
                                 buff.color(j, i) = materials[vertexes[it->ids[0]].m].diffuse * diffuse_angle;
                             } else {
                                 buff.color(j, i) = 0.0;
                             }
                             //specular
-                            Vec3 ref_lignt = normal * 2.0 * p2l.n.dot(normal) - p2l.n;
+                            Vec3 ref_lignt = n * 2.0 * p2l.n.dot(n) - p2l.n;
                             real norm_facotr = 1;//(50.0+2.0)/(2.0*M_PI);
                             real specular_power = norm_facotr * pow(std::min(0.0, ray.n.dot(ref_lignt)), 50.0);
                             buff.color(j, i) += materials[vertexes[it->ids[0]].m].specular * specular_power;
