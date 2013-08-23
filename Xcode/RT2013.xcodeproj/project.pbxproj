@@ -25,6 +25,9 @@
 		C330404D176C6C8F0055DBA8 /* intersection_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C330404C176C6C8E0055DBA8 /* intersection_test.cpp */; };
 		C3304050176C75B40055DBA8 /* geom_util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C330404E176C75B40055DBA8 /* geom_util.cpp */; };
 		C3304051176C75B40055DBA8 /* geom_util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C330404E176C75B40055DBA8 /* geom_util.cpp */; };
+		C33053DF17C7F53D00882A83 /* cbox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C33053DD17C7F53D00882A83 /* cbox.cpp */; };
+		C33053E217C7F5DF00882A83 /* screen_buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C33053E017C7F5DF00882A83 /* screen_buffer.cpp */; };
+		C33053E517C7F63800882A83 /* camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C33053E317C7F63800882A83 /* camera.cpp */; };
 		C3A8FF9417C5631A00416EA4 /* kdtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C330403B1767FFCF0055DBA8 /* kdtree.cpp */; };
 		C3A8FF9517C5631A00416EA4 /* scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C330403F176801A30055DBA8 /* scene.cpp */; };
 		C3A8FF9617C5631A00416EA4 /* intersection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3304049176C6C4A0055DBA8 /* intersection.cpp */; };
@@ -90,6 +93,12 @@
 		C330404E176C75B40055DBA8 /* geom_util.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = geom_util.cpp; sourceTree = "<group>"; };
 		C330404F176C75B40055DBA8 /* geom_util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = geom_util.h; sourceTree = "<group>"; };
 		C3304052176CD6DA0055DBA8 /* pair_util.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = pair_util.hpp; sourceTree = "<group>"; };
+		C33053DD17C7F53D00882A83 /* cbox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cbox.cpp; sourceTree = "<group>"; };
+		C33053DE17C7F53D00882A83 /* cbox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cbox.h; sourceTree = "<group>"; };
+		C33053E017C7F5DF00882A83 /* screen_buffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = screen_buffer.cpp; sourceTree = "<group>"; };
+		C33053E117C7F5DF00882A83 /* screen_buffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = screen_buffer.h; sourceTree = "<group>"; };
+		C33053E317C7F63800882A83 /* camera.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = camera.cpp; sourceTree = "<group>"; };
+		C33053E417C7F63800882A83 /* camera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = camera.h; sourceTree = "<group>"; };
 		C3A8FF9017C541E900416EA4 /* material.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = material.h; sourceTree = "<group>"; };
 		C3A8FF9E17C5631A00416EA4 /* RT2013 copy */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "RT2013 copy"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3A8FFA017C57E4F00416EA4 /* radiance.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = radiance.cpp; sourceTree = "<group>"; };
@@ -170,6 +179,12 @@
 				C3A8FFA617C60E4200416EA4 /* mat_reflection.cpp */,
 				C3A8FFAA17C60F7100416EA4 /* mat_transparent.h */,
 				C3A8FFA917C60F7000416EA4 /* mat_transparent.cpp */,
+				C33053DE17C7F53D00882A83 /* cbox.h */,
+				C33053DD17C7F53D00882A83 /* cbox.cpp */,
+				C33053E117C7F5DF00882A83 /* screen_buffer.h */,
+				C33053E017C7F5DF00882A83 /* screen_buffer.cpp */,
+				C33053E417C7F63800882A83 /* camera.h */,
+				C33053E317C7F63800882A83 /* camera.cpp */,
 			);
 			name = src;
 			path = ../src;
@@ -308,6 +323,9 @@
 				C3A8FFA517C60C8700416EA4 /* mat_diffuse.cpp in Sources */,
 				C3A8FFA817C60E4400416EA4 /* mat_reflection.cpp in Sources */,
 				C3A8FFAB17C60F7200416EA4 /* mat_transparent.cpp in Sources */,
+				C33053DF17C7F53D00882A83 /* cbox.cpp in Sources */,
+				C33053E217C7F5DF00882A83 /* screen_buffer.cpp in Sources */,
+				C33053E517C7F63800882A83 /* camera.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -74,6 +74,7 @@ public:
 };
 
 struct Environment {
+    typedef std::mt19937::result_type init_type;
     Environment(std::mt19937::result_type n):engin(n), dist(0.0, 1.0) {}
     std::vector<real> refraction_stack;
     std::mt19937 engin;
@@ -81,6 +82,6 @@ struct Environment {
     real rand01() {return dist(engin);}
 };
     
-Vec4 get_radiance(const Ray &ray, const Scene &scene, std::mt19937::result_type seed);
+Vec4 get_radiance(const Ray &ray, const Scene &scene, size_t seed);
 
 #endif // radiance_H

@@ -14,6 +14,7 @@
 #include "mat_transparent.cpp"
 
 #include <random>
+#include <chrono>
 
 static void push_rad_ctx_stack(RadianceContextStack &stack,
                         const Scene &scene,
@@ -36,7 +37,8 @@ static void push_rad_ctx_stack(RadianceContextStack &stack,
             stack.push_back(p);
             break;
         case Material::MT_REFLECTION:
-            p = new ReflectionRadianceContext(scene.materials[mat_id],
+            p = new ReflectionRadianceContext(env,
+                                              scene.materials[mat_id],
                                               stack.size(),
                                               std::move(info));
             assert(p);
@@ -44,7 +46,8 @@ static void push_rad_ctx_stack(RadianceContextStack &stack,
             break;
             
         case Material::MT_TRANSPARENT:
-            p = new TransparentRadianceContext(scene.materials[mat_id],
+            p = new TransparentRadianceContext(env,
+                                               scene.materials[mat_id],
                                                stack.size(),
                                                env.refraction_stack,
                                                std::move(info));
@@ -59,10 +62,11 @@ static void push_rad_ctx_stack(RadianceContextStack &stack,
     
 }
 
-Vec4 get_radiance(const Ray &ray, const Scene &scene, std::mt19937::result_type seed) {
+Vec4 get_radiance(const Ray &ray, const Scene &scene, size_t seed) {
     
-    
-    Environment env(seed);
+    time_t t;
+    ctime(&t);
+    Environment env(static_cast<Environment::init_type>(t * seed));
     env.refraction_stack.push_back(kAIR_REFRACTION);//bug
     
     RadianceContextStack rad_ctx_stack;

@@ -72,14 +72,18 @@ struct DiffuseRadianceContext : public RadianceContext {
     
     void create_montecarlo_direction(Vec3 &n)
     {
-        real theta = M_PI * env.rand01();
-        real phi =  2.0 * M_PI * env.rand01();
-        n.x() = sin(theta) * cos(phi);
-        n.y() = sin(theta) * sin(phi);
-        n.z() = cos(theta);
-        if(n.dot(info->normal) < 0.0) {
-            n = n * -1.0;
+        Vec3 w(info->normal.dot(info->ray.n)), u, v;//from edupt
+        if(std::abs(w.x()) > 1.0e-8) {
+            u = Vec3(0.0, 1.0, 0.0).cross(w).to_normal();
+        } else {
+            u = Vec3(1.0, 0.0, 0.0).cross(w).to_normal();
         }
+        v = w.cross(u);
+        const real theta = 2.0 * M_PI * env.rand01();
+        const real phi = env.rand01();
+        const real dist = std::sqrt(phi);
+        n = u * cos(theta) * dist + v * sin(theta) * dist + w * sqrt(1.0 - dist);
+        n.to_normal();
     }
     
     virtual bool step_start(Ray &next_ray) {
@@ -89,7 +93,6 @@ struct DiffuseRadianceContext : public RadianceContext {
                 next_ray.o = info->hitpoint;
                 create_montecarlo_direction(next_ray.n);
                 next_ray.t = type_traits<real>::inf();
-                step_direction = next_ray.n;
                 step_flag = true;
                 return true;
             }
