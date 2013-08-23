@@ -23,36 +23,12 @@
 #include <map>
 #include <random>
 #include <memory>
+#include <sstream>
+#include <thread>
+#include <atomic>
 
 //unko macro
 #define self (*this)
-
-real kAIR_REFRACTION = 1.000292;
-real kHOGE_REFRACTION = 1.05;
-real kDIAMOND_REFRACTION = 2.42;
-real kFREQUENCY_R = 700.0;//nm
-real kFREQUENCY_G = 546.1;//nm
-real kFREQUENCY_B = 435.8;//nm
-
-inline real K2C(real c) {//kelvin to celsius
-    return c - 273.15;
-}
-
-real create_refraction_air_edlen(real temp_c, real pressure_hpa, real humidity_1per) {
-    return 1.0+3.83639*10.0e-7*
-    0.75 * pressure_hpa * ( (1+0.75*pressure_hpa*(0.817-0.0133*temp_c)*10.0e-6)/(1+0.003661*temp_c) )
-    -5.607943*10.0e-10*humidity_1per*(4.07859739+0.44301857*temp_c + 0.00232093*temp_c*temp_c + 0.00045785*temp_c*temp_c*temp_c);
-}
-
-real create_refraction_air(real refraction, real temp, real pressure, real humidity_10per, real co2_100ppm) {
-    return refraction +
-    //(temp * -10.0 + pressure * 300.0 + humidity_10per * -100.0 + co2_100ppm * 1000.0)
-    (temp * -1.0 + pressure * 0.3 + humidity_10per * -0.1 + co2_100ppm * 0.01)
-    * 1.0e-6;
-}
-
-
-
 
 
 void create_cbox1(Scene &scene) {
@@ -61,10 +37,7 @@ void create_cbox1(Scene &scene) {
     std::vector<Triangle> &triangles = scene.triangles;
     std::vector<Vertex> &vertexes = scene.vertexes;
     MaterialTable &materials = scene.materials;
-    std::vector<Vec3> &lights = scene.lights;
     
-    lights.push_back(Vec3(0.0,9.9,0.0));
-    //lights.push_back(Vec3(0.0,-9.9,0.0));
     
     //left wall
     DiffuseMaterial *mat0 = new DiffuseMaterial();
@@ -267,6 +240,16 @@ void create_cbox1(Scene &scene) {
     triangles.push_back(Triangle(i,i+1,i+2));
     triangles.push_back(Triangle(i,i+2,i+3));
     i += 4;
+    
+    //light1
+    DiffuseMaterial *mat7 = new DiffuseMaterial();
+    materials.push_back(mat7);
+    mat7->diffuse = 0.0;
+    mat7->specular = 0.0;
+    mat7->emission = 1.0;
+    
+    spheres.push_back(Sphere(Vec3(0.0, 10.0, 0.0), 2.0));
+    spheres[4].m = 7;
 
 }
 
@@ -371,7 +354,7 @@ uint8_t convert_display_color(real val) {
     } else if(1.0 <= val){
         return 255;
     } else {
-        return val * 255.0;
+        return pow(val, 1.0/2.2) * 255.0 + 0.5;
     }
 }
 
@@ -425,92 +408,6 @@ void write_bitmap(const ScreenBuffer &buff, std::ofstream &ofs) {
 }
 
 
-struct Environment {
-    std::vector<real> refraction_stack;
-};
-
-void push_rad_ctx_stack(RadianceContextStack &stack,
-                        const Scene &scene,
-                        Environment &env,
-                        std::unique_ptr<const Scene::IntersectionInformation> &&info) {
-    size_t mat_id;
-    if(info->is_triangle) {
-        mat_id = scene.vertexes[scene.triangles[info->geom_id].ids[0]].m;
-    } else {
-        mat_id = scene.spheres[info->geom_id].m;
-    }
-    RadianceContext *p;
-    switch (scene.materials[mat_id]->mat_type()) {
-        case Material::MT_DIFFUSE:
-            p = new DiffuseRadianceContext(scene.materials[mat_id],
-                                           scene,
-                                           std::move(info));
-            assert(p);
-            stack.push_back(p);
-            break;
-        case Material::MT_REFLECTION:
-            p = new ReflectionRadianceContext(scene.materials[mat_id],
-                                              stack.size(),
-                                              std::move(info));
-            assert(p);
-            stack.push_back(p);
-            break;
-            
-        case Material::MT_TRANSPARENT:
-            p = new TransparentRadianceContext(scene.materials[mat_id],
-                                               stack.size(),
-                                               env.refraction_stack,
-                                               std::move(info));
-            assert(p);
-            stack.push_back(p);
-            break;
-            
-        default:
-            assert(0);
-            break;
-    }
-    
-}
-
-Vec4 get_radiance(const Ray &ray, const Scene &scene) {
-    
-    
-    Environment env;
-    env.refraction_stack.push_back(kAIR_REFRACTION);
-    
-    RadianceContextStack rad_ctx_stack;
-    ResultRadianceContext *p_ret_ctx = new ResultRadianceContext(ray);
-    assert(p_ret_ctx);
-    rad_ctx_stack.push_back(p_ret_ctx);
-    
-    std::unique_ptr<Scene::IntersectionInformation> first_info(new Scene::IntersectionInformation());
-    if(scene.get_intersecton(ray, *first_info)) {
-        push_rad_ctx_stack(rad_ctx_stack, scene, env, std::move(first_info));
-    }
-    
-    Vec4 last_radiance(0.0);
-    while (1 < rad_ctx_stack.size()) {
-        Ray step_ray;
-        if(rad_ctx_stack.back()->step_start(step_ray)) {
-            
-            std::unique_ptr<Scene::IntersectionInformation> info(new Scene::IntersectionInformation());
-            if(scene.get_intersecton(step_ray, *info)) {
-                push_rad_ctx_stack(rad_ctx_stack, scene, env, std::move(info));
-            } else {
-                rad_ctx_stack.back()->step_end(Vec4(0.0));
-            }
-            
-        } else {
-            rad_ctx_stack.back()->step_end(last_radiance);
-            last_radiance = rad_ctx_stack.back()->result();
-            rad_ctx_stack.pop_back_with_delete();
-            rad_ctx_stack.back()->step_end(last_radiance);
-        }
-        
-    }
-
-    return p_ret_ctx->result();
-}
 
 
 struct TimeCount {
@@ -524,6 +421,12 @@ struct TimeCount {
     }
 };
 
+const size_t kWIDTH = 320;
+const size_t kHEIGHT = 240;
+const size_t kNUM_SAMPLES = 100;
+
+typedef std::pair<size_t, size_t> VRange;
+
 int main(int argc, const char * argv[])
 {
     
@@ -531,7 +434,24 @@ int main(int argc, const char * argv[])
     
     create_cbox1(scene);
     
-    ScreenBuffer buff(640,480);
+    ScreenBuffer buff(kWIDTH,kHEIGHT);
+    
+    //time result threads
+    bool thread_flag = true;
+    std::thread time_result([&thread_flag, &buff](){
+        while(thread_flag) {
+            std::this_thread::sleep_for(std::chrono::minutes(1));//TODO
+            size_t count = 0;
+            std::stringstream sst;
+            sst << "./result" << count << ".bmp";
+            std::ofstream ofs(sst.str(), std::ios::binary | std::ios::trunc);
+            if(!ofs) {
+                assert(0);
+            }
+            write_bitmap(buff, ofs);
+            count++;
+        }
+    });
  
     Camera cam;
     cam.fov = 60.0 * M_PI/180.0;//to rad
@@ -539,22 +459,77 @@ int main(int argc, const char * argv[])
     cam.pos = Vec3(0.0, 0.0, -10.0 + std::cos(cam.fov/2.0) * (-10.0/std::sin(cam.fov/2.0)));
     cam.mat = DMat<4,4>::identity();
     
-    std::mt19937 engin;
-    std::uniform_real_distribution<real> dist(0.0, 1.0);
+    std::mt19937 engin(1234);
+    
+    //render threads
+    size_t num_thread = std::thread::hardware_concurrency();
+    std::vector<VRange> v_ranges;
+    size_t slice_size = kHEIGHT / (num_thread * 5);
+    size_t slice_rem = kHEIGHT;
+    size_t slice_start = 0;
+    while (slice_rem >= slice_size) {
+        v_ranges.push_back(VRange(slice_start, slice_size));
+        slice_rem -= slice_size;
+        slice_start += slice_size;
+    }
+    if(slice_rem) {
+        v_ranges.push_back(VRange(slice_start, slice_rem));
+    }
+    
         
     {
         TimeCount tc("ray tracing");
         
         cam.setup();
 
-        for(size_t j = 0; j < buff.h; ++j) {//vertical
-            for(size_t i = 0; i < buff.w; ++i) {//horizontal
-                Ray ray = cam.get_ray(buff, i, j);
-                if(i == 233 && j == 169) {
-                    printf("aa");
-                }
-                buff.color(j,i) = get_radiance(ray, scene);
+        std::atomic<size_t> thread_count(0);
+        std::atomic<size_t> finished_line_count(0);
+        std::condition_variable condition;
+        while(v_ranges.size()) {
+            
+            while(num_thread > thread_count && v_ranges.size()) {
+                
+                VRange &v_range = v_ranges.back();
+                std::mt19937::result_type mt_init = engin();//TODO
+                
+                thread_count++;
+                std::thread th([&, v_range, mt_init]() {
+                    
+                    std::mt19937 thread_engin(mt_init);//TODO
+                    std::uniform_real_distribution<real> dist(0.0, 1.0);
+                    
+                    for(size_t j = v_range.first; j < v_range.first + v_range.second; ++j) {//vertical
+                        for(size_t i = 0; i < buff.w; ++i) {//horizontal
+                            Ray ray = cam.get_ray(buff, i, j);
+                            for(size_t sample = 0; sample < kNUM_SAMPLES; ++sample) {
+                                buff.color(j,i) += get_radiance(ray, scene, thread_engin()) / kNUM_SAMPLES;
+                            }
+                            //printf("%zd %zd\n", i, j);
+                        }
+                        finished_line_count++;
+                        size_t count = finished_line_count;
+                        printf("%zd / %zd\n", count, kHEIGHT);
+                    }
+                    
+                    thread_count--;
+                    condition.notify_one();
+                });
+                th.detach();
+                
+                v_ranges.pop_back();
             }
+            
+            //wait
+            std::mutex mutex;
+            std::unique_lock<std::mutex> lock(mutex);
+            condition.wait(lock);
+        }
+        //join
+        while(thread_count != 0) {
+            //wait
+            std::mutex mutex;
+            std::unique_lock<std::mutex> lock(mutex);
+            condition.wait(lock);
         }
         tc.display_now();
     }
@@ -568,6 +543,9 @@ int main(int argc, const char * argv[])
         write_bitmap(buff, ofs);
         tc.display_now();
     }
+    
+    thread_flag = false;
+    time_result.join();
     
     return 0;
 }

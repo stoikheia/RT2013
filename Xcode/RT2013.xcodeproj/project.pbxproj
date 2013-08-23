@@ -30,7 +30,6 @@
 		C3A8FF9617C5631A00416EA4 /* intersection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3304049176C6C4A0055DBA8 /* intersection.cpp */; };
 		C3A8FF9717C5631A00416EA4 /* geom_util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C330404E176C75B40055DBA8 /* geom_util.cpp */; };
 		C3A8FF9817C5631A00416EA4 /* obj_io.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C305037817838A240071EA81 /* obj_io.cpp */; };
-		C3A8FF9F17C5633300416EA4 /* main_phong.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C37B408E17944F0A00407E88 /* main_phong.cpp */; };
 		C3A8FFA217C57E5000416EA4 /* radiance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3A8FFA017C57E4F00416EA4 /* radiance.cpp */; };
 		C3A8FFA517C60C8700416EA4 /* mat_diffuse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3A8FFA317C60C8600416EA4 /* mat_diffuse.cpp */; };
 		C3A8FFA817C60E4400416EA4 /* mat_reflection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3A8FFA617C60E4200416EA4 /* mat_reflection.cpp */; };
@@ -91,7 +90,6 @@
 		C330404E176C75B40055DBA8 /* geom_util.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = geom_util.cpp; sourceTree = "<group>"; };
 		C330404F176C75B40055DBA8 /* geom_util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = geom_util.h; sourceTree = "<group>"; };
 		C3304052176CD6DA0055DBA8 /* pair_util.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = pair_util.hpp; sourceTree = "<group>"; };
-		C37B408E17944F0A00407E88 /* main_phong.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main_phong.cpp; sourceTree = "<group>"; };
 		C3A8FF9017C541E900416EA4 /* material.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = material.h; sourceTree = "<group>"; };
 		C3A8FF9E17C5631A00416EA4 /* RT2013 copy */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "RT2013 copy"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3A8FFA017C57E4F00416EA4 /* radiance.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = radiance.cpp; sourceTree = "<group>"; };
@@ -154,7 +152,6 @@
 			isa = PBXGroup;
 			children = (
 				C33040251767800A0055DBA8 /* main.cpp */,
-				C37B408E17944F0A00407E88 /* main_phong.cpp */,
 				C33040261767800A0055DBA8 /* shape */,
 				C33040281767800A0055DBA8 /* tests */,
 				C330403C1767FFCF0055DBA8 /* kdtree.h */,
@@ -335,7 +332,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C3A8FF9F17C5633300416EA4 /* main_phong.cpp in Sources */,
 				C3A8FF9417C5631A00416EA4 /* kdtree.cpp in Sources */,
 				C3A8FF9517C5631A00416EA4 /* scene.cpp in Sources */,
 				C3A8FF9617C5631A00416EA4 /* intersection.cpp in Sources */,

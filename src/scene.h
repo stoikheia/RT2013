@@ -15,12 +15,15 @@
 #include "shape/intersection.h"
 #include "material.h"
 
+extern const real kAIR_REFRACTION;
+extern const real kHOGE_REFRACTION;
+extern const real kDIAMOND_REFRACTION;
+
 struct Scene {
     std::vector<Sphere> spheres;
     std::vector<Triangle> triangles;
     std::vector<Vertex> vertexes;
     MaterialTable materials;
-    std::vector<Vec3> lights;
     
     struct IntersectionInformation {
         Ray ray;

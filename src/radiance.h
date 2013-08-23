@@ -14,6 +14,7 @@
 #include "shape/intersection.h"
 #include "material.h"
 #include "scene.h"
+#include <random>
 
 struct RadianceContext {
     virtual ~RadianceContext() {};
@@ -72,5 +73,14 @@ public:
 
 };
 
+struct Environment {
+    Environment(std::mt19937::result_type n):engin(n), dist(0.0, 1.0) {}
+    std::vector<real> refraction_stack;
+    std::mt19937 engin;
+    std::uniform_real_distribution<real> dist;
+    real rand01() {return dist(engin);}
+};
+    
+Vec4 get_radiance(const Ray &ray, const Scene &scene, std::mt19937::result_type seed);
 
 #endif // radiance_H
