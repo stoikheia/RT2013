@@ -23,6 +23,7 @@ public:
 
 struct TransparentRadianceContext : public RadianceContext {
     
+    Environment &env;
     size_t step;
     size_t depth;
     real current_refraction;
@@ -34,11 +35,12 @@ struct TransparentRadianceContext : public RadianceContext {
     const TransparentMaterial *mat;
     std::unique_ptr<const Scene::IntersectionInformation> info;//owner
     
-    TransparentRadianceContext(const Material *mat_,
+    TransparentRadianceContext(Environment &env_,
+                               const Material *mat_,
                                const real depth_,
                                std::vector<real> &refraction_stack,
                                std::unique_ptr<const Scene::IntersectionInformation> &&info_)
-    :step(0),depth(depth_),
+    :env(env_),step(0),depth(depth_),
     radiance(0.0),info(std::move(info_))
     {
         assert(mat_->mat_type() == Material::MT_TRANSPARENT);
