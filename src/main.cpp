@@ -421,9 +421,9 @@ struct TimeCount {
     }
 };
 
-const size_t kWIDTH = 320;
-const size_t kHEIGHT = 240;
-const size_t kNUM_SAMPLES = 100;
+const size_t kWIDTH = 640;
+const size_t kHEIGHT = 480;
+const size_t kNUM_SAMPLES = 1200;
 
 typedef std::pair<size_t, size_t> VRange;
 
@@ -438,10 +438,14 @@ int main(int argc, const char * argv[])
     
     //time result threads
     bool thread_flag = true;
-    std::thread time_result([&thread_flag, &buff](){
+    std::condition_variable time_result_condition;
+    std::thread time_result([&thread_flag, &time_result_condition, &buff](){
+        size_t count = 0;
         while(thread_flag) {
+            std::mutex mutex;
+            std::unique_lock<std::mutex> lock(mutex);
+            time_result_condition.wait_for(lock, std::chrono::minutes(1));
             std::this_thread::sleep_for(std::chrono::minutes(1));//TODO
-            size_t count = 0;
             std::stringstream sst;
             sst << "./result" << count << ".bmp";
             std::ofstream ofs(sst.str(), std::ios::binary | std::ios::trunc);
@@ -545,6 +549,7 @@ int main(int argc, const char * argv[])
     }
     
     thread_flag = false;
+    time_result_condition.notify_one();
     time_result.join();
     
     return 0;
