@@ -33,9 +33,10 @@ struct ReflectionRadianceContext : public RadianceContext {
                               size_t depth_,
                               std::unique_ptr<const Scene::IntersectionInformation> &&info_)
     :step(0),depth(depth_),
-    radiance(0.0),info(std::move(info_)) {
+    radiance(0.0),info(std::move(info_))
+    {
         assert(mat_->mat_type() == Material::MT_REFLECTION);
-        mat = (ReflectionMaterial*)mat_;
+        mat = static_cast<const ReflectionMaterial*>(mat_);
     }
     
     virtual bool step_start(Ray &next_ray) {

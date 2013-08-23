@@ -24,19 +24,46 @@ struct RadianceContext {
     virtual Vec4 result() = 0;
 };
 
-class RadianceContextStock : public std::vector<RadianceContext*> {
+struct ResultRadianceContext : public RadianceContext {
+    
+    Ray ray;
+    bool first_step;
+    Vec4 radiance;
+    
+    ResultRadianceContext(Ray ray_):ray(ray_), first_step(true), radiance(0.0) {}
+    virtual ~ResultRadianceContext() {}
+    
+    virtual bool step_start(Ray &next_ray) {
+        if(first_step) {
+            next_ray = ray;
+            first_step = false;
+            return true;
+        } else {
+            return false;
+        }
+    }
+    virtual bool step_end(const Vec4 &radiance_) {
+        radiance = radiance_;
+        return false;
+    }
+    virtual Vec4 result() {
+        return radiance;
+    }
+};
+
+class RadianceContextStack : public std::vector<RadianceContext*> {
 public:
-    RadianceContextStock():std::vector<RadianceContext*>() {}
-    ~RadianceContextStock() {
+    RadianceContextStack():std::vector<RadianceContext*>() {}
+    ~RadianceContextStack() {
         for(auto it = this->begin(); it != this->end(); ++it) {
             delete *it;
         }
         this->clear();
     }
-    RadianceContextStock(const RadianceContextStock &mt) {assert(0);}
-    RadianceContextStock(RadianceContextStock &&mt) {assert(0);}
-    RadianceContextStock& operator=(const RadianceContextStock &mt) {assert(0);}
-    RadianceContextStock& operator=(RadianceContextStock &&mt) {assert(0);}
+    RadianceContextStack(const RadianceContextStack &mt) {assert(0);}
+    RadianceContextStack(RadianceContextStack &&mt) {assert(0);}
+    RadianceContextStack& operator=(const RadianceContextStack &mt) {assert(0);}
+    RadianceContextStack& operator=(RadianceContextStack &&mt) {assert(0);}
     
     void pop_back_with_delete() {
         delete this->back();

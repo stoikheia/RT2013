@@ -15,6 +15,7 @@
 #include "radiance.h"
 #include "mat_diffuse.h"
 #include "mat_reflection.h"
+#include "mat_transparent.h"
 
 #include <iostream>
 #include <vector>
@@ -27,6 +28,8 @@
 #define self (*this)
 
 real kAIR_REFRACTION = 1.000292;
+real kHOGE_REFRACTION = 1.05;
+real kDIAMOND_REFRACTION = 2.42;
 real kFREQUENCY_R = 700.0;//nm
 real kFREQUENCY_G = 546.1;//nm
 real kFREQUENCY_B = 435.8;//nm
@@ -92,28 +95,29 @@ void create_cbox1(Scene &scene) {
     mat2->emission = 0.0;
     //sphere1
     ReflectionMaterial *mat3 = new ReflectionMaterial();
-    //DiffuseMaterial *mat3 = new DiffuseMaterial();
     materials.push_back(mat3);
-//    mat3->diffuse.a() = 1.0;
-//    mat3->diffuse.r() = 0.0;
-//    mat3->diffuse.g() = 0.5;
-//    mat3->diffuse.b() = 0.5;
-//    mat3->specular = 1.0;
-//    mat3->emission = 0.0;
     //sphere2
-    DiffuseMaterial *mat4 = new DiffuseMaterial();
+    TransparentMaterial *mat4 = new TransparentMaterial();
+    mat4->refraction = kHOGE_REFRACTION;
     materials.push_back(mat4);
-    mat4->diffuse.a() = 1.0;
-    mat4->diffuse.r() = 0.5;
-    mat4->diffuse.g() = 0.0;
-    mat4->diffuse.b() = 0.5;
-    mat4->specular = 1.0;
-    mat4->emission = 0.0;
+
+    DiffuseMaterial *mat5 = new DiffuseMaterial();
+    materials.push_back(mat5);
+    mat5->diffuse.a() = 1.0;
+    mat5->diffuse.r() = 0.5;
+    mat5->diffuse.g() = 0.0;
+    mat5->diffuse.b() = 0.5;
+    mat5->specular = 1.0;
+    mat5->emission = 0.0;
     
     spheres.push_back(Sphere(Vec3(6.5, -7.0, 0.0), 3.0));
     spheres[0].m = 3;
     spheres.push_back(Sphere(Vec3(-5.0, 3.0, 5.0), 4.0));
     spheres[1].m = 4;
+    spheres.push_back(Sphere(Vec3(-7.0, -8.0, 0.0), 2.0));
+    spheres[2].m = 4;
+    spheres.push_back(Sphere(Vec3(0.0, -8.0, 7.5), 2.0));
+    spheres[3].m = 5;
     
     
 
@@ -183,14 +187,14 @@ void create_cbox1(Scene &scene) {
     
     
     //box1
-    DiffuseMaterial *mat5 = new DiffuseMaterial();
-    materials.push_back(mat5);
-    mat5->diffuse.a() = 1.0;
-    mat5->diffuse.r() = 1.0;
-    mat5->diffuse.g() = 1.0;
-    mat5->diffuse.b() = 1.0;
-    mat5->specular = 1.0;
-    mat5->emission = 0.0;
+    DiffuseMaterial *mat6 = new DiffuseMaterial();
+    materials.push_back(mat6);
+    mat6->diffuse.a() = 1.0;
+    mat6->diffuse.r() = 1.0;
+    mat6->diffuse.g() = 1.0;
+    mat6->diffuse.b() = 1.0;
+    mat6->specular = 1.0;
+    mat6->emission = 0.0;
     
     const Vec3 p2[8] = {
         Vec3(-7.0, -10.0, 3.0),//o
@@ -209,35 +213,35 @@ void create_cbox1(Scene &scene) {
         Vec2(0.0, 0.0),
     };
     //left
-    vertexes.push_back(Vertex(p2[0], n2[0], t2[0],5));
-    vertexes.push_back(Vertex(p2[4], n2[0], t2[0],5));
-    vertexes.push_back(Vertex(p2[6], n2[0], t2[0],5));
-    vertexes.push_back(Vertex(p2[2], n2[0], t2[0],5));
+    vertexes.push_back(Vertex(p2[0], n2[0], t2[0],6));
+    vertexes.push_back(Vertex(p2[4], n2[0], t2[0],6));
+    vertexes.push_back(Vertex(p2[6], n2[0], t2[0],6));
+    vertexes.push_back(Vertex(p2[2], n2[0], t2[0],6));
     //right
-    vertexes.push_back(Vertex(p2[1], n2[0], t2[0],5));
-    vertexes.push_back(Vertex(p2[3], n2[0], t2[0],5));
-    vertexes.push_back(Vertex(p2[7], n2[0], t2[0],5));
-    vertexes.push_back(Vertex(p2[5], n2[0], t2[0],5));
+    vertexes.push_back(Vertex(p2[1], n2[0], t2[0],6));
+    vertexes.push_back(Vertex(p2[3], n2[0], t2[0],6));
+    vertexes.push_back(Vertex(p2[7], n2[0], t2[0],6));
+    vertexes.push_back(Vertex(p2[5], n2[0], t2[0],6));
     //front
-    vertexes.push_back(Vertex(p2[0], n2[0], t2[0],5));
-    vertexes.push_back(Vertex(p2[2], n2[0], t2[0],5));
-    vertexes.push_back(Vertex(p2[3], n2[0], t2[0],5));
-    vertexes.push_back(Vertex(p2[1], n2[0], t2[0],5));
+    vertexes.push_back(Vertex(p2[0], n2[0], t2[0],6));
+    vertexes.push_back(Vertex(p2[2], n2[0], t2[0],6));
+    vertexes.push_back(Vertex(p2[3], n2[0], t2[0],6));
+    vertexes.push_back(Vertex(p2[1], n2[0], t2[0],6));
     //back
-    vertexes.push_back(Vertex(p2[4], n2[0], t2[0],5));
-    vertexes.push_back(Vertex(p2[5], n2[0], t2[0],5));
-    vertexes.push_back(Vertex(p2[7], n2[0], t2[0],5));
-    vertexes.push_back(Vertex(p2[6], n2[0], t2[0],5));
+    vertexes.push_back(Vertex(p2[4], n2[0], t2[0],6));
+    vertexes.push_back(Vertex(p2[5], n2[0], t2[0],6));
+    vertexes.push_back(Vertex(p2[7], n2[0], t2[0],6));
+    vertexes.push_back(Vertex(p2[6], n2[0], t2[0],6));
     //ceil
-    vertexes.push_back(Vertex(p2[2], n2[0], t2[0],5));
-    vertexes.push_back(Vertex(p2[6], n2[0], t2[0],5));
-    vertexes.push_back(Vertex(p2[7], n2[0], t2[0],5));
-    vertexes.push_back(Vertex(p2[3], n2[0], t2[0],5));
+    vertexes.push_back(Vertex(p2[2], n2[0], t2[0],6));
+    vertexes.push_back(Vertex(p2[6], n2[0], t2[0],6));
+    vertexes.push_back(Vertex(p2[7], n2[0], t2[0],6));
+    vertexes.push_back(Vertex(p2[3], n2[0], t2[0],6));
     //floor
-    vertexes.push_back(Vertex(p2[0], n2[0], t2[0],5));
-    vertexes.push_back(Vertex(p2[1], n2[0], t2[0],5));
-    vertexes.push_back(Vertex(p2[5], n2[0], t2[0],5));
-    vertexes.push_back(Vertex(p2[4], n2[0], t2[0],5));
+    vertexes.push_back(Vertex(p2[0], n2[0], t2[0],6));
+    vertexes.push_back(Vertex(p2[1], n2[0], t2[0],6));
+    vertexes.push_back(Vertex(p2[5], n2[0], t2[0],6));
+    vertexes.push_back(Vertex(p2[4], n2[0], t2[0],6));
 
     //left
     triangles.push_back(Triangle(i,i+1,i+2));
@@ -422,12 +426,13 @@ void write_bitmap(const ScreenBuffer &buff, std::ofstream &ofs) {
 
 
 struct Environment {
-    
+    std::vector<real> refraction_stack;
 };
 
-void push_rad_ctx_stock(RadianceContextStock &stock,
-                          const Scene &scene,
-                          std::unique_ptr<const Scene::IntersectionInformation> &&info) {
+void push_rad_ctx_stack(RadianceContextStack &stack,
+                        const Scene &scene,
+                        Environment &env,
+                        std::unique_ptr<const Scene::IntersectionInformation> &&info) {
     size_t mat_id;
     if(info->is_triangle) {
         mat_id = scene.vertexes[scene.triangles[info->geom_id].ids[0]].m;
@@ -441,14 +446,23 @@ void push_rad_ctx_stock(RadianceContextStock &stock,
                                            scene,
                                            std::move(info));
             assert(p);
-            stock.push_back(p);
+            stack.push_back(p);
             break;
         case Material::MT_REFLECTION:
             p = new ReflectionRadianceContext(scene.materials[mat_id],
-                                              stock.size(),
+                                              stack.size(),
                                               std::move(info));
             assert(p);
-            stock.push_back(p);
+            stack.push_back(p);
+            break;
+            
+        case Material::MT_TRANSPARENT:
+            p = new TransparentRadianceContext(scene.materials[mat_id],
+                                               stack.size(),
+                                               env.refraction_stack,
+                                               std::move(info));
+            assert(p);
+            stack.push_back(p);
             break;
             
         default:
@@ -458,39 +472,44 @@ void push_rad_ctx_stock(RadianceContextStock &stock,
     
 }
 
-Vec4 get_radiance(const Ray &ray, const Scene &scene, const Environment &env) {
+Vec4 get_radiance(const Ray &ray, const Scene &scene) {
     
-    std::mt19937 engin;
-    std::uniform_real_distribution<real> dist(0.0, 1.0);
     
-    RadianceContextStock rad_ctx_stock;
+    Environment env;
+    env.refraction_stack.push_back(kAIR_REFRACTION);
+    
+    RadianceContextStack rad_ctx_stack;
+    ResultRadianceContext *p_ret_ctx = new ResultRadianceContext(ray);
+    assert(p_ret_ctx);
+    rad_ctx_stack.push_back(p_ret_ctx);
     
     std::unique_ptr<Scene::IntersectionInformation> first_info(new Scene::IntersectionInformation());
     if(scene.get_intersecton(ray, *first_info)) {
-        push_rad_ctx_stock(rad_ctx_stock, scene, std::move(first_info));
+        push_rad_ctx_stack(rad_ctx_stack, scene, env, std::move(first_info));
     }
     
     Vec4 last_radiance(0.0);
-    while (rad_ctx_stock.size()) {
+    while (1 < rad_ctx_stack.size()) {
         Ray step_ray;
-        if(rad_ctx_stock.back()->step_start(step_ray)) {
+        if(rad_ctx_stack.back()->step_start(step_ray)) {
             
             std::unique_ptr<Scene::IntersectionInformation> info(new Scene::IntersectionInformation());
             if(scene.get_intersecton(step_ray, *info)) {
-                push_rad_ctx_stock(rad_ctx_stock, scene, std::move(info));
+                push_rad_ctx_stack(rad_ctx_stack, scene, env, std::move(info));
             } else {
-                rad_ctx_stock.back()->step_end(Vec4(0.0));
+                rad_ctx_stack.back()->step_end(Vec4(0.0));
             }
             
         } else {
-            rad_ctx_stock.back()->step_end(last_radiance);
-            last_radiance = rad_ctx_stock.back()->result();
-            rad_ctx_stock.pop_back_with_delete();
+            rad_ctx_stack.back()->step_end(last_radiance);
+            last_radiance = rad_ctx_stack.back()->result();
+            rad_ctx_stack.pop_back_with_delete();
+            rad_ctx_stack.back()->step_end(last_radiance);
         }
         
     }
 
-    return last_radiance;
+    return p_ret_ctx->result();
 }
 
 
@@ -520,9 +539,9 @@ int main(int argc, const char * argv[])
     cam.pos = Vec3(0.0, 0.0, -10.0 + std::cos(cam.fov/2.0) * (-10.0/std::sin(cam.fov/2.0)));
     cam.mat = DMat<4,4>::identity();
     
-    Environment env;
-    //env.refractive_index = kAIR_REFRACTION;
-    
+    std::mt19937 engin;
+    std::uniform_real_distribution<real> dist(0.0, 1.0);
+        
     {
         TimeCount tc("ray tracing");
         
@@ -531,7 +550,10 @@ int main(int argc, const char * argv[])
         for(size_t j = 0; j < buff.h; ++j) {//vertical
             for(size_t i = 0; i < buff.w; ++i) {//horizontal
                 Ray ray = cam.get_ray(buff, i, j);
-                buff.color(j,i) = get_radiance(ray, scene, env);
+                if(i == 233 && j == 169) {
+                    printf("aa");
+                }
+                buff.color(j,i) = get_radiance(ray, scene);
             }
         }
         tc.display_now();
@@ -549,108 +571,4 @@ int main(int argc, const char * argv[])
     
     return 0;
 }
-
-/* ----------------- */
-/*
-Vec4 get_radiance__old(const Ray &ray, const Scene &scene, const Environment &env ,const Vec3 &light) {
-    
-    Ray p2l;
-    Vec4 radiance(0.0);
-    std::vector<Triangle>::const_iterator last_hit_triangle_it = scene.triangles.end();
-    std::vector<Sphere>::const_iterator last_hit_sphere_it = scene.spheres.end();
-    real min_distance = std::numeric_limits<real>::max();
-    for (auto it = scene.triangles.begin(); it != scene.triangles.end(); ++it) {
-        Vec3 point;
-        real length, angle;
-        if(ray.get_intersection_point(*it, scene.vertexes, point, length, angle)) {
-            //real distance = (point - cam.pos).length();
-            if(length < min_distance) {
-                min_distance = length;
-                p2l = Ray::create_start_end(point, light);
-                last_hit_triangle_it = it;
-                Vec3 normal = it->create_plane(scene.vertexes).n;
-                //diffuse
-                real diffuse_angle = p2l.n.dot(normal);
-                if(0 <= diffuse_angle) {
-                    radiance = scene.materials[scene.vertexes[it->ids[0]].m].diffuse * diffuse_angle;
-                }
-                //specular
-                Vec3 ref_lignt = normal * 2.0 * p2l.n.dot(normal) - p2l.n;
-                real norm_facotr = 1;//(50.0+2.0)/(2.0*M_PI);
-                real specular_power = norm_facotr * pow(std::min(0.0, ray.n.dot(ref_lignt)), 50.0);
-                radiance += scene.materials[scene.vertexes[it->ids[0]].m].specular * specular_power;
-            }
-        }
-    }
-    for (auto it = scene.spheres.begin(); it != scene.spheres.end(); ++it) {
-        std::vector<Vec3> points;
-        std::vector<real> lengths;
-        if(ray.get_intersection_point(*it, points, lengths)) {
-            real distance = lengths[0];
-            Vec3 point = points[0];
-            if(1 < lengths.size() && lengths[1] <= distance) {
-                assert(0 <= lengths[1]);
-                distance = lengths[1];
-                point = points[1];
-            }
-            if(distance < min_distance) {
-                min_distance = distance;
-                p2l = Ray::create_start_end(point, light);
-                last_hit_sphere_it = it;
-                Ray c2p = Ray::create_start_end(it->p, point);
-                //diffuse
-                real diffuse_angle = p2l.n.dot(c2p.n);
-                if(0 <= diffuse_angle) {
-                    radiance = scene.materials[it->m].diffuse * diffuse_angle;
-                } else {
-                    radiance = 0.0;
-                }
-                //specular
-                Vec3 ref_lignt = c2p.n * 2.0 * p2l.n.dot(c2p.n) - p2l.n;
-                real norm_facotr = 1;//(50.0+2.0)/(2.0*M_PI);
-                real specular_power = norm_facotr * pow(std::min(0.0, ray.n.dot(ref_lignt)), 50.0);
-                radiance += scene.materials[it->m].specular * specular_power;
-            }
-        }
-    }
-    //shadow
-    if(last_hit_triangle_it != scene.triangles.end() || last_hit_sphere_it != scene.spheres.end()) {
-        bool shadow_flag = false;
-        for (auto it = scene.triangles.begin(); !shadow_flag && it != scene.triangles.end(); ++it) {
-            if(it == last_hit_triangle_it) {
-                continue;
-            }
-            Vec3 point;
-            if(p2l.get_intersection_point(*it, scene.vertexes, point)) {
-                radiance = radiance * 0.5;
-                shadow_flag = true;
-            }
-        }
-        for (auto it = scene.spheres.begin(); !shadow_flag && it != scene.spheres.end(); ++it) {
-            if(it == last_hit_sphere_it) {
-                continue;
-            }
-            std::vector<Vec3> points;
-            std::vector<real> lengths;
-            if(p2l.get_intersection_point(*it, points, lengths)) {
-                radiance = radiance * 0.5;
-                shadow_flag = true;
-            }
-        }
-    }
-    return radiance;
- }*/
-
-//    const DiffuseMaterial* get_diffuse_material(size_t i) const {
-//        assert(self[i]->mat_type() == Material::MT_DIFFUSE);
-//        return reinterpret_cast<DiffuseMaterial*>(self.at(i));
-//    }
-//    const ReflectionMaterial* get_reflection_material(size_t i) const {
-//        assert(self[i]->mat_type() == Material::MT_REFLECTION);
-//        return reinterpret_cast<ReflectionMaterial*>(self.at(i));
-//    }
-//    const TransparentMaterial* get_transparent_material(size_t i) const {
-//        assert(self[i]->mat_type() == Material::MT_TRANSPARENT);
-//        return reinterpret_cast<TransparentMaterial*>(self.at(i));
-//    }
 
