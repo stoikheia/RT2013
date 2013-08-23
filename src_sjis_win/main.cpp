@@ -26,6 +26,9 @@
 #include <sstream>
 #include <thread>
 #include <atomic>
+#include <cmath>
+//VC
+#include <condition_variable>
 
 //unko macro
 #define self (*this)

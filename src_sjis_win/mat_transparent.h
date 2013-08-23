@@ -13,6 +13,8 @@
 #include "material.h"
 #include "radiance.h"
 
+#include <memory>
+
 class TransparentMaterial : public Material {
 public:
     real refraction;

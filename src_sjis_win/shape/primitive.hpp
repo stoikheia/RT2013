@@ -61,12 +61,12 @@ struct DMat {//density matrix
         
     real e[M*N];
     
-    DMat() = default;
-    DMat(const DMat &mat) = default;
-    DMat(DMat &&) = default;
-    ~DMat() = default;
-    DMat& operator=(const DMat &) = default;
-    DMat& operator=(DMat &&) = default;
+	DMat() {};
+	DMat(const DMat &mat) {memcpy(self.e, mat.e, sizeof(e));}
+	DMat(DMat &&mat) {memcpy(self.e, mat.e, sizeof(e));}
+	~DMat() {}
+	DMat& operator=(const DMat &mat) {memcpy(self.e, mat.e, sizeof(e));return self;}
+	DMat& operator=(DMat &&mat) {memcpy(self.e, mat.e, sizeof(e));return self;}
     
     DMat(real val)
     {std::fill(begin(), end(), val);}
@@ -131,13 +131,12 @@ struct Vec2 : DMat<1,2> {
     typedef const real* const_iterator;
     static const size_t N = 2;
         
-    //POD
-    Vec2() = default;
-    Vec2(const Vec2 &) = default;
-    Vec2(Vec2 &&) = default;
-    ~Vec2() = default;
-    Vec2& operator=(const Vec2 &) = default;
-    Vec2& operator=(Vec2 &&) = default;
+	Vec2() {};
+	Vec2(const Vec2 &v):DMat<1,2>(v){}
+	Vec2(Vec2 &&v):DMat<1,2>(v){}
+	~Vec2(){}
+	Vec2& operator=(const Vec2 &v) {memcpy(self.e, v.e, sizeof(e));return self;}
+	Vec2& operator=(Vec2 &&v) {memcpy(self.e, v.e, sizeof(e));return self;}
     
     Vec2(real val) {std::fill(begin(), end(), val);}
     Vec2(real x, real y) {e[0]=x;e[1]=y;}
@@ -171,8 +170,6 @@ struct Vec2 : DMat<1,2> {
     real v() const {return self[1];}
     
 };
-static_assert(std::is_pod<Vec2>::value, "Vec2 is not POD.");
-
 
 struct Vec3 : DMat<1,3> {
     
@@ -180,13 +177,12 @@ struct Vec3 : DMat<1,3> {
     typedef const real* const_iterator;
     static const size_t N = 3;
         
-    //POD
-    Vec3() = default;
-    Vec3(const Vec3 &) = default;
-    Vec3(Vec3 &&) = default;
-    ~Vec3() = default;
-    Vec3& operator=(const Vec3 &) = default;
-    Vec3& operator=(Vec3 &&) = default;
+	Vec3():DMat<1,3>() {}
+    Vec3(const Vec3 &v):DMat<1,3>(v) {}
+    Vec3(Vec3 &&v):DMat<1,3>(v) {}
+	~Vec3() {}
+	Vec3& operator=(const Vec3 &v) {memcpy(self.e, v.e, sizeof(e));return self;}
+	Vec3& operator=(Vec3 &&v) {memcpy(self.e, v.e, sizeof(e));return self;}
     
     Vec3(real val) {std::fill(begin(), end(), val);}
     Vec3(real x, real y, real z) {e[0]=x;e[1]=y;e[2]=z;}
@@ -297,7 +293,6 @@ struct Vec3 : DMat<1,3> {
     }
 
 };
-static_assert(std::is_pod<Vec3>::value, "Vec3 is not POD.");
 
 struct Vec4 : DMat<1,4> {
     
@@ -305,13 +300,12 @@ struct Vec4 : DMat<1,4> {
     typedef const real* const_iterator;
     static const size_t N = 4;
         
-    //POD
-    Vec4() = default;
-    Vec4(const Vec4 &) = default;
-    Vec4(Vec4 &&) = default;
-    ~Vec4() = default;
-    Vec4& operator=(const Vec4 &) = default;
-    Vec4& operator=(Vec4 &&) = default;
+	Vec4():DMat<1,4>() {};
+	Vec4(const Vec4 &v):DMat<1,4>(v) {};
+    Vec4(Vec4 &&v):DMat<1,4>(v) {};
+	~Vec4() {}
+	Vec4& operator=(const Vec4 &v) {memcpy(self.e, v.e, sizeof(e));return self;}
+    Vec4& operator=(Vec4 &&v) {memcpy(self.e, v.e, sizeof(e));return self;}
     
     Vec4(real val) {std::fill(begin(), end(), val);}
     Vec4(real x, real y, real z, real w) {e[0]=x;e[1]=y;e[2]=z;e[3]=w;}
@@ -396,8 +390,6 @@ struct Vec4 : DMat<1,4> {
     }
     
 };
-static_assert(std::is_pod<Vec4>::value, "Vec4 is not POD.");
-
 
 struct Vertex {
     
@@ -408,13 +400,12 @@ struct Vertex {
     Vec2 t;//tex
     size_t m;//mat id
     
-    //POD
-    Vertex() = default;
-    Vertex(const Vertex &) = default;
-    Vertex(Vertex &&) = default;
-    ~Vertex() = default;
-    Vertex& operator=(const Vertex &) = default;
-    Vertex& operator=(Vertex &&) = default;
+	Vertex() {}
+	Vertex(const Vertex &v):p(v.p),n(v.n),t(v.t),m(v.m) {}
+	Vertex(Vertex &&v):p(std::move(v.p)),n(std::move(v.n)),t(std::move(v.t)),m(std::move(v.m)) {};
+	~Vertex() {}
+	Vertex& operator=(const Vertex &v) {self.p=v.p;self.n=v.n;self.t=v.t;self.m=v.m;return self;}
+    Vertex& operator=(Vertex &&v) {self.p=v.p;self.n=v.n;self.t=v.t;self.m=v.m;return self;}
     
     Vertex(const Vec3 &p_, const Vec3 &n_, const Vec2 &t_, size_t m_)
     :p(p_),n(n_),t(t_),m(m_) {}
@@ -423,7 +414,7 @@ struct Vertex {
     Vertex(real p_, real n_, real t_, size_t m_)
     :p(p_),n(n_),t(t_),m(m_) {}
 };
-static_assert(std::is_pod<Vertex>::value, "Vertex is not POD.");
+//static_assert(std::is_pod<Vertex>::value, "Vertex is not POD.");
 
 #undef self
 

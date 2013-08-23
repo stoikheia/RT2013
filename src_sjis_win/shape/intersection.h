@@ -19,12 +19,12 @@ struct Ray {
     Vec3 o,n;//origin, direction(normal)
     real t;//length
 
-    Ray() = default;
-    Ray(const Ray&) = default;
-    Ray(Ray&&) = default;
-    ~Ray() = default;
-    Ray& operator=(const Ray&) = default;
-    Ray& operator=(Ray&&) = default;
+	Ray() {}
+	Ray(const Ray &r):o(r.o), n(r.n), t(r.t) {}
+    Ray(Ray &&r):o(r.o), n(r.n), t(r.t) {}
+	~Ray() {}
+	Ray& operator=(const Ray &r) {self.o=r.o;self.n=r.n;self.t=r.t;return self;}
+    Ray& operator=(Ray &&r) {self.o=r.o;self.n=r.n;self.t=r.t;return self;}
     
     Ray(const Vec3 &o_, const Vec3 &n_, real len = type_traits<real>::inf())
     :o(o_),n(n_),t(len) {}
@@ -200,12 +200,12 @@ struct AABB {
     Vec3 min_corner;
     Vec3 max_corner;
 
-    AABB() = default;
-    AABB(const AABB &) = default;
-    AABB(AABB &&) = default;
-    ~AABB() = default;
-    AABB& operator=(const AABB&) = default;
-    AABB& operator=(AABB&&) = default;
+	AABB() {};
+	AABB(const AABB &aabb):min_corner(aabb.min_corner),max_corner(aabb.max_corner){}
+    AABB(AABB &&aabb):min_corner(std::move(aabb.min_corner)),max_corner(std::move(aabb.max_corner)){}
+	~AABB() {}
+	AABB& operator=(const AABB &aabb) {self.min_corner = aabb.min_corner;self.max_corner = aabb.max_corner;return self;}
+    AABB& operator=(AABB &&aabb) {self.min_corner = std::move(aabb.min_corner);self.max_corner = std::move(aabb.max_corner);return self;}
     
     AABB(const Vec3 &input_min_corner, const Vec3 &input_max_corner)
         :min_corner(input_min_corner),max_corner(input_max_corner) {}

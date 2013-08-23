@@ -26,12 +26,13 @@ struct Sphere {
     real r;
     size_t m;//material id
     
-    Sphere() = default;
+	Sphere() {};
     Sphere(const Vec3 &p_, real r_)
     :p(p_),r(r_),m() {}
-    Sphere(const Sphere &s) = default;
-    Sphere& operator=(const Sphere &sphere) = default;
-    Sphere& operator=(Sphere &&sphere) = default;
+    Sphere(const Sphere &s)
+    :p(s.p),r(s.r),m(s.m) {}
+	Sphere& operator=(const Sphere &sphere) {self = sphere;}
+	Sphere& operator=(Sphere &&sphere) {self = std::move(sphere);}
 };
 
 struct Plane {
@@ -52,12 +53,12 @@ struct Triangle {
     
     size_t ids[3];//ids
     
-    Triangle() = default;
-    ~Triangle() = default;
-    Triangle(const Triangle&) = default;
-    Triangle(Triangle&&) = default;
-    Triangle &operator=(const Triangle&) = default;
-    Triangle &operator=(Triangle&&) = default;
+	Triangle() {}
+	~Triangle() {}
+    Triangle(const Triangle &tri) {memcpy(self.ids,tri.ids, sizeof(ids));}
+    Triangle(Triangle &&tri) {memcpy(self.ids, tri.ids, sizeof(ids));}
+    Triangle &operator=(const Triangle &tri) {memcpy(self.ids,tri.ids, sizeof(ids));}
+    Triangle &operator=(Triangle &&tri) {memcpy(self.ids,tri.ids, sizeof(ids));}
     
     Triangle(size_t id0, size_t id1, size_t id2)
     {ids[0] = id0; ids[1] = id1; ids[2] = id2;}
@@ -89,7 +90,6 @@ struct Triangle {
     }
     
 };
-static_assert(std::is_pod<Triangle>::value, "Triangle is not POD");
 
 
 #undef self

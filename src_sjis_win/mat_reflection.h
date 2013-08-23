@@ -12,6 +12,7 @@
 
 #include "material.h"
 #include "radiance.h"
+#include <memory>
 
 class ReflectionMaterial : public Material {
 public:

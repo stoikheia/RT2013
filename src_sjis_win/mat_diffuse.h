@@ -13,8 +13,11 @@
 #include "material.h"
 #include "radiance.h"
 
+#include <cmath>
 #include <memory>
 
+//unko macro
+#define self (*this)
 
 class DiffuseMaterial : public Material {
     
@@ -23,12 +26,12 @@ public:
     Vec4 specular;
     Vec4 emission;
     
-    DiffuseMaterial() = default;
-    DiffuseMaterial(const DiffuseMaterial &m) = default;
-    DiffuseMaterial(DiffuseMaterial &&) = default;
+	DiffuseMaterial() {};
+	DiffuseMaterial(const DiffuseMaterial &m):diffuse(m.diffuse),specular(m.specular),emission(m.emission) {}
+	DiffuseMaterial(DiffuseMaterial &&m):diffuse(m.diffuse),specular(m.specular),emission(m.emission) {}
     virtual ~DiffuseMaterial() {};
-    DiffuseMaterial& operator=(const DiffuseMaterial &) = default;
-    DiffuseMaterial& operator=(DiffuseMaterial &&) = default;
+	DiffuseMaterial& operator=(const DiffuseMaterial &m) {self.diffuse=m.diffuse;self.specular=m.specular;self.emission=m.emission;}
+    DiffuseMaterial& operator=(DiffuseMaterial &&m) {self.diffuse=m.diffuse;self.specular=m.specular;self.emission=m.emission;}
     
     DiffuseMaterial(real val)
     :diffuse(val),specular(val),emission(val) {}

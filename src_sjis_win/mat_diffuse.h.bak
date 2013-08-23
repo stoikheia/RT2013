@@ -13,8 +13,11 @@
 #include "material.h"
 #include "radiance.h"
 
+#include <cmath>
 #include <memory>
 
+//unko macro
+#define self (*this)
 
 class DiffuseMaterial : public Material {
     
@@ -23,12 +26,12 @@ public:
     Vec4 specular;
     Vec4 emission;
     
-    DiffuseMaterial() = default;
-    DiffuseMaterial(const DiffuseMaterial &m) = default;
-    DiffuseMaterial(DiffuseMaterial &&) = default;
+	DiffuseMaterial() {};
+	DiffuseMaterial(const DiffuseMaterial &m):diffuse(m.diffuse),specular(m.specular),emission(m.emission) {}
+	DiffuseMaterial(DiffuseMaterial &&m):diffuse(m.diffuse),specular(m.specular),emission(m.emission) {}
     virtual ~DiffuseMaterial() {};
-    DiffuseMaterial& operator=(const DiffuseMaterial &) = default;
-    DiffuseMaterial& operator=(DiffuseMaterial &&) = default;
+	DiffuseMaterial& operator=(const DiffuseMaterial &m) {self.diffuse=m.diffuse;self.specular=m.specular;self.emission=m.emission;}
+    DiffuseMaterial& operator=(DiffuseMaterial &&m) {self.diffuse=m.diffuse;self.specular=m.specular;self.emission=m.emission;}
     
     DiffuseMaterial(real val)
     :diffuse(val),specular(val),emission(val) {}
@@ -72,18 +75,14 @@ struct DiffuseRadianceContext : public RadianceContext {
     
     void create_montecarlo_direction(Vec3 &n)
     {
-        Vec3 w(info->normal.dot(info->ray.n)), u, v;//from edupt
-        if(std::abs(w.x()) > 1.0e-8) {
-            u = Vec3(0.0, 1.0, 0.0).cross(w).to_normal();
-        } else {
-            u = Vec3(1.0, 0.0, 0.0).cross(w).to_normal();
+        real theta = M_PI * env.rand01();
+        real phi =  2.0 * M_PI * env.rand01();
+        n.x() = sin(theta) * cos(phi);
+        n.y() = sin(theta) * sin(phi);
+        n.z() = cos(theta);
+        if(n.dot(info->normal) < 0.0) {
+            n = n * -1.0;
         }
-        v = w.cross(u);
-        const real theta = 2.0 * M_PI * env.rand01();
-        const real phi = env.rand01();
-        const real dist = std::sqrt(phi);
-        n = u * cos(theta) * dist + v * sin(theta) * dist + w * sqrt(1.0 - dist);
-        n.to_normal();
     }
     
     virtual bool step_start(Ray &next_ray) {
@@ -93,6 +92,7 @@ struct DiffuseRadianceContext : public RadianceContext {
                 next_ray.o = info->hitpoint;
                 create_montecarlo_direction(next_ray.n);
                 next_ray.t = type_traits<real>::inf();
+                step_direction = next_ray.n;
                 step_flag = true;
                 return true;
             }
