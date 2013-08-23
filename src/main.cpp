@@ -445,7 +445,6 @@ int main(int argc, const char * argv[])
             std::mutex mutex;
             std::unique_lock<std::mutex> lock(mutex);
             time_result_condition.wait_for(lock, std::chrono::minutes(1));
-            std::this_thread::sleep_for(std::chrono::minutes(1));//TODO
             std::stringstream sst;
             sst << "./result" << count << ".bmp";
             std::ofstream ofs(sst.str(), std::ios::binary | std::ios::trunc);
