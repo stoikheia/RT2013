@@ -51,6 +51,7 @@ void create_cbox1(Scene &scene) {
     mat2->emission = 0.0;
     //sphere1
     ReflectionMaterial *mat3 = new ReflectionMaterial();
+    mat3->reflection = 1.0;
     materials.push_back(mat3);
     //sphere2
     TransparentMaterial *mat4 = new TransparentMaterial();

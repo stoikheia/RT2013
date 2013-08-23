@@ -30,10 +30,10 @@
 //unko macro
 #define self (*this)
 
-const size_t kWIDTH = 320;
-const size_t kHEIGHT = 240;
-const size_t kNUM_SAMPLES = 500;
-const size_t kNUM_SUB_SAMPLES = 4;//random sub sampling
+const size_t kWIDTH = 640;
+const size_t kHEIGHT = 480;
+const size_t kNUM_SAMPLES = 300;
+const size_t kNUM_SUB_SAMPLES = 3;//random sub sampling
 
 struct TimeCount {
     std::chrono::high_resolution_clock::time_point time_point;
