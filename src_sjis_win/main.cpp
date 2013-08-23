@@ -202,7 +202,7 @@ void start_job(const Camera &cam, const Scene &scene, ScreenBuffer &sb, VRange r
             }
             job_info.finished_line_count++;
             size_t count = job_info.finished_line_count;
-            printf("%zd / %zd\n", count, kHEIGHT);//log
+            printf("%d / %d\n", count, kHEIGHT);//log
         }
         
         job_info.thread_count--;
