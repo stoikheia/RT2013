@@ -35,7 +35,7 @@ struct ScreenBuffer {
     
     uint8_t convert_display_color(real val) {
         if(0.0 > val) {
-            return 0.0;
+            return 0;
         } else if(1.0 <= val){
             return 255;
         } else {
