@@ -72,7 +72,7 @@ struct DiffuseRadianceContext : public RadianceContext {
     
     void create_montecarlo_direction(Vec3 &n)
     {
-        Vec3 w(info->normal.dot(info->ray.n)), u, v;//from edupt
+        Vec3 w(info->normal), u, v;//from edupt
         if(std::abs(w.x()) > 1.0e-8) {
             u = Vec3(0.0, 1.0, 0.0).cross(w).to_normal();
         } else {
